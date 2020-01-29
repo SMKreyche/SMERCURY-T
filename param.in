@@ -3,12 +3,12 @@
 )---------------------------------------------------------------------
 ) Important integration parameters:
 )---------------------------------------------------------------------
- algorithm (MVS, BS, BS2, RADAU, HYBRID etc) = spin
+ algorithm (MVS, BS, BS2, RADAU, HYBRID, SPIN, etc.) = SPIN
  start time (days)= 0.d0
  stop time (days) = +365.25d6
  output interval (days) = 365.25d2
  timestep (days) = 4.4d0
- accuracy parameter=1.d-10
+ accuracy parameter=1.d-12
 )---------------------------------------------------------------------
 ) Integration options:
 )---------------------------------------------------------------------
@@ -20,18 +20,18 @@
  output precision = high
  < Not used at present >
  < Not used at present >
- include relativity in integration = yes
+ include user-defined force (general relativity) = yes
 )---------------------------------------------------------------------
 ) These parameters do not need to be adjusted often:
 )---------------------------------------------------------------------
- ejection distance (AU)= 100
- radius of central body (AU) = 0.1
- central mass (solar) = 1.0
- central J2 = 0
- central J3 = 0
- central J4 = 0
+ ejection distance (AU) = 100.d0
+ radius of central body (AU) = 0.005d0
+ central mass (solar) = 1.0d0
+ central J2 = 0.d0
+ central J3 = 0.d0
+ central J4 = 0.d0
  < Not used at present >
  giant-planet gas accretion rate = 6760.d0
- Hybrid integrator changeover (AU) = 0.05
- number of timesteps between data dumps = 55000
+ Hybrid integrator changeover (AU) = 0.05d0
+ number of timesteps between data dumps = 113636
  number of timesteps between periodic effects = 1000

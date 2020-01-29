@@ -89,8 +89,8 @@ c  OPT(4) = o/p precision (1,2,3 = 4,9,15 significant figures)
 c  OPT(5) = < Not used at present >
 c  OPT(6) = < Not used at present >
 c  OPT(7) = apply post-Newtonian correction? (0=no, 1=yes)
-c  OPT(8) = apply user-defined force routine mfo_user (this routine includes general
-c           relativistic accelerations for the spin algorithm 9)? (0=no, 1=yes) -- SMK
+c  OPT(8) = apply user-defined force routine mfo_user? (this routine includes general
+c           relativistic accelerations for the spin algorithm 9) (0=no, 1=yes) -- SMK
 c
 c File variables :
 c --------------
@@ -338,7 +338,6 @@ c		  write (*,*) ' x[1,10] = ', x(1,10), ' x[2,10] = ', x(2,10)
       end if
 c
 c Advance interaction Hamiltonian for H/2
-
         do j = 2, nbig
             a_GR(1,j) = 0.d0
             a_GR(2,j) = 0.d0
@@ -862,9 +861,9 @@ c Store a copy of the matrix
           c_1(i,j) = 0.d0
         end do
       end do
-      c_1(1,1) = 1
-      c_1(2,2) = 1
-      c_1(3,3) = 1
+      c_1(1,1) = 1.d0
+      c_1(2,2) = 1.d0
+      c_1(3,3) = 1.d0
 c
 c Invert the lower triangle of matrix C
       tmp1 = cc(2,1) / cc(1,1)
@@ -977,7 +976,7 @@ c Computing for big bodies
       
 c Gathering the parts
         m_ratio = m(j)/m(1)
-        GR_param = m(1)*m(j) / (m(1)+m(j))**2
+        GR_param = m(1)*m(j) / (m(1)+m(j))**2.d0
         
         r_2 = x(1,j)*x(1,j) + x(2,j)*x(2,j) + x(3,j)*x(3,j)
         r_mag = sqrt(r_2)
@@ -1092,7 +1091,7 @@ c Set up time of next output, times of previous dump, log and periodic effect
       else
         n = int (abs (time - tstart) / dtout) + 1
         tout = tstart  +  dtout * sign (dble(n), tstop - tstart)
-        if ((tstop - tstart)*(tout - tstop).gt.0) tout = tstop
+        if ((tstop - tstart)*(tout - tstop).gt.0.d0) tout = tstop
       end if
       tdump = time
       tfun  = time
@@ -1429,7 +1428,7 @@ c			write (*,*) 's(3,2) = ', s(3,2), '; s(3,E+180) = ', s(3,nbig+1)
        
        call mxx_obl (jcen,nbod,nbig,m,xh,vh,s,rho,obl_max,obl_min,0)
 
-       if (tmp0.lt.(2*h0)) then
+       if (tmp0.lt.(2.d0*h0)) then
          open (23,file=outfile(3),status='old',access='append')
          do j = nbig + 1, nbod
            write (23, '(a,E15.7,5X,E15.7)') id(j), obl_max(j), 
@@ -1635,16 +1634,16 @@ c
         ymax(j) = max (x0(2,j), x1(2,j))
 c
 c If velocity changes sign, do an interpolation
-        if ((v0(1,j).lt.0.and.v1(1,j).gt.0).or.
-     %      (v0(1,j).gt.0.and.v1(1,j).lt.0)) then
+        if ((v0(1,j).lt.0.d0.and.v1(1,j).gt.0.d0).or.
+     %      (v0(1,j).gt.0.d0.and.v1(1,j).lt.0.d0)) then
           temp = (v0(1,j)*x1(1,j) - v1(1,j)*x0(1,j) 
      %            - .5d0*h*v0(1,j)*v1(1,j)) / (v0(1,j) - v1(1,j))
           xmin(j) = min (xmin(j),temp)
           xmax(j) = max (xmax(j),temp)
         end if
 c
-        if ((v0(2,j).lt.0.and.v1(2,j).gt.0).or.
-     %      (v0(2,j).gt.0.and.v1(2,j).lt.0)) then
+        if ((v0(2,j).lt.0.d0.and.v1(2,j).gt.0.d0).or.
+     %      (v0(2,j).gt.0.d0.and.v1(2,j).lt.0.d0)) then
           temp = (v0(2,j)*x1(2,j) - v1(2,j)*x0(2,j) 
      %            - .5d0*h*v0(2,j)*v1(2,j)) / (v0(2,j) - v1(2,j))
           ymin(j) = min (ymin(j),temp)
@@ -1720,7 +1719,7 @@ c Check for collisions with the central body
         end if
 c
 c If inside the central body, or passing through pericentre, use 2-body approx.
-        if ((rv0*h.le.0.and.rv1*h.ge.0).or.min(rr0,rr1).le.rcen2) then
+        if ((rv0*h.le.0.d0.and.rv1*h.ge.0.d0).or.min(rr0,rr1).le.rcen2) then
           if (algor.eq.11) then
             hx = xu0(2,j) * vu0(3,j)  -  xu0(3,j) * vu0(2,j)
             hy = xu0(3,j) * vu0(1,j)  -  xu0(1,j) * vu0(3,j)
@@ -1746,7 +1745,7 @@ c If the object hit the central body
             dhit(nhit) = rcen
 c
 c Time of impact relative to the end of the timestep
-            if (e.lt.1) then
+            if (e.lt.1.d0) then
               a = q / (1.d0 - e)
               uhit = sign (acos((1.d0 - rcen/a)/e), -h)
               u0   = sign (acos((1.d0 - r0/a  )/e), rv0)
@@ -1906,7 +1905,7 @@ c
         call mco_x2a (gm,x(1,j),x(2,j),x(3,j),v(1,j),v(2,j),v(3,j),a(j),
      %    r,v2)
 c If orbit is hyperbolic, use the distance rather than the semi-major axis
-        if (a(j).le.0) a(j) = r
+        if (a(j).le.0.d0) a(j) = r
         hill(j) = a(j) * (THIRD * m(j) / m(1))**THIRD
       end do
 c
@@ -2187,7 +2186,7 @@ c Local
 c
 c------------------------------------------------------------------------------
 c
-      if (d0t*h.gt.0.or.d1t*h.lt.0) then
+      if (d0t*h.gt.0.d0.or.d1t*h.lt.0.d0) then
         if (d0.le.d1) then
           d2min = d0
           tmin = -h
@@ -2202,7 +2201,7 @@ c
         c = h * d1t
 c
         temp =-.5d0*(b + sign (sqrt(max(b*b - 4.d0*a*c,0.d0)), b) )
-        if (temp.eq.0) then
+        if (temp.eq.0.d0) then
           tau = 0.d0
         else
           tau = c / temp
@@ -2447,7 +2446,7 @@ c Estimate minimum separation during the time interval, using interpolation
 c
 c If the minimum separation qualifies as an encounter or if a collision
 c is in progress, store details
-            if ((d2min.le.d2ce.and.d0t*h.le.0.and.d1t*h.ge.0)
+            if ((d2min.le.d2ce.and.d0t*h.le.0.d0.and.d1t*h.ge.0.d0)
      %        .or.(d2min.le.d2hit)) then
               nclo = nclo + 1
               if (nclo.gt.CMAX) then
@@ -2503,7 +2502,7 @@ c Make sure the more massive body is listed first
               end if
 c
 c Is this the collision closest to the start of the time step?
-              if ((tmin-thit1)*h.lt.0) then
+              if ((tmin-thit1)*h.lt.0.d0) then
                 thit1 = tmin
                 nowflag = 0
                 if (d1.le.d2hit) nowflag = 1
@@ -3386,31 +3385,29 @@ c------------------------------------------------------------------------------
 c
       function mco_kep (e,oldl)
       implicit none
+      include 'mercury.inc'
 c
 c Input/Outout
       real*8 oldl,e,mco_kep
 c
 c Local
-      real*8 l,pi,twopi,piby2,u1,u2,ome,sign
+      real*8 l,u1,u2,ome,sign
       real*8 x,x2,sn,dsn,z1,z2,z3,f0,f1,f2,f3
       real*8 p,q,p2,ss,cc
       logical flag,big,bigg
 c
 c------------------------------------------------------------------------------
 c
-      pi = 3.141592653589793d0
-      twopi = 2.d0 * pi
-      piby2 = .5d0 * pi
-c
-c Reduce mean anomaly to lie in the range 0 < l < pi
-      if (oldl.ge.0) then
-        l = mod(oldl, twopi)
+
+c Reduce mean anomaly to lie in the range 0 < l < PI
+      if (oldl.ge.0.d0) then
+        l = mod(oldl, TWOPI)
       else
-        l = mod(oldl, twopi) + twopi
+        l = mod(oldl, TWOPI) + TWOPI
       end if
       sign = 1.d0
-      if (l.gt.pi) then
-        l = twopi - l
+      if (l.gt.PI) then
+        l = TWOPI - l
         sign = -1.d0
       end if
 c
@@ -3425,23 +3422,23 @@ c Rough starting value for eccentric anomaly
         if (l.lt.ome) then
           u1 = ome
         else
-          if (l.gt.(pi-1.d0-e)) then
-            u1 = (l+e*pi)/(1.d0+e)
+          if (l.gt.(PI-1.d0-e)) then
+            u1 = (l+e*PI)/(1.d0+e)
           else
             u1 = l + e
           end if
         end if
 c
 c Improved value using Halley's method
-        flag = u1.gt.piby2
+        flag = u1.gt.PIBY2
         if (flag) then
-          x = pi - u1
+          x = PI - u1
         else
           x = u1
         end if
         x2 = x*x
-        sn = x*(1.d0 + x2*(-.16605 + x2*.00761) )
-        dsn = 1.d0 + x2*(-.49815 + x2*.03805)
+        sn = x*(1.d0 + x2*(-.16605d0 + x2*.00761d0) )
+        dsn = 1.d0 + x2*(-.49815d0 + x2*.03805d0)
         if (flag) dsn = -dsn
         f2 = e*sn
         f0 = u1 - f2 - l
@@ -3457,7 +3454,7 @@ c Rough starting value for eccentric anomaly
         p = ome / z1
         q = .5d0 * l / z1
         p2 = p*p
-        z2 = exp( log( dsqrt( p2*p + q*q ) + q )/1.5 )
+        z2 = exp( log( dsqrt( p2*p + q*q ) + q )/1.5d0 )
         u1 = 2.d0*q / ( z2 + p + p2/z2 )
 c
 c Improved value using Newton's method
@@ -3471,16 +3468,16 @@ c Accurate value using 3rd-order version of Newton's method
 c N.B. Keep cos(u2) rather than sqrt( 1-sin^2(u2) ) to maintain accuracy!
 c
 c First get accurate values for u2 - sin(u2) and 1 - cos(u2)
-      bigg = (u2.gt.piby2)
+      bigg = (u2.gt.PIBY2)
       if (bigg) then
-        z3 = pi - u2
+        z3 = PI - u2
       else
         z3 = u2
       end if
 c
-      big = (z3.gt.(.5d0*piby2))
+      big = (z3.gt.(.5d0*PIBY2))
       if (big) then
-        x = piby2 - z3
+        x = PIBY2 - z3
       else
         x = z3
       end if
@@ -3489,22 +3486,22 @@ c
       ss = 1.d0
       cc = 1.d0
 c
-      ss = x*x2/6.*(1. - x2/20.*(1. - x2/42.*(1. - x2/72.*(1. -
-     %   x2/110.*(1. - x2/156.*(1. - x2/210.*(1. - x2/272.)))))))
-      cc =   x2/2.*(1. - x2/12.*(1. - x2/30.*(1. - x2/56.*(1. -
-     %   x2/ 90.*(1. - x2/132.*(1. - x2/182.*(1. - x2/240.*(1. -
-     %   x2/306.))))))))
+      ss = x*x2/6.d0*(1.d0 - x2/20.d0*(1.d0 - x2/42.d0*(1.d0 - x2/72.d0*(1.d0 -
+     %   x2/110.d0*(1.d0 - x2/156.d0*(1.d0 - x2/210.d0*(1.d0 - x2/272.d0)))))))
+      cc =   x2/2.d0*(1.d0 - x2/12.d0*(1.d0 - x2/30.d0*(1.d0 - x2/56.d0*(1.d0 -
+     %   x2/ 90.d0*(1.d0 - x2/132.d0*(1.d0 - x2/182.d0*(1.d0 - x2/240.d0*(1.d0 -
+     %   x2/306.d0))))))))
 c
       if (big) then
         z1 = cc + z3 - 1.d0
-        z2 = ss + z3 + 1.d0 - piby2
+        z2 = ss + z3 + 1.d0 - PIBY2
       else
         z1 = ss
         z2 = cc
       end if
 c
       if (bigg) then
-        z1 = 2.d0*u2 + z1 - pi
+        z1 = 2.d0*u2 + z1 - PI
         z2 = 2.d0 - z2
       end if
 c
@@ -3536,27 +3533,23 @@ c
       subroutine mco_sine (x,sx,cx)
 c
       implicit none
+      include 'mercury.inc'
+            
 c
 c Input/Output
       real*8 x,sx,cx
 c
-c Local
-      real*8 pi,twopi
-c
 c------------------------------------------------------------------------------
 c
-      pi = 3.141592653589793d0
-      twopi = 2.d0 * pi
-c
-      if (x.gt.0) then
-        x = mod(x,twopi)
+      if (x.gt.0.d0) then
+        x = mod(x,TWOPI)
       else
-        x = mod(x,twopi) + twopi
+        x = mod(x,TWOPI) + TWOPI
       end if
 c
       cx = cos(x)
 c
-      if (x.gt.pi) then
+      if (x.gt.PI) then
         sx = -sqrt(1.d0 - cx*cx)
       else
         sx =  sqrt(1.d0 - cx*cx)
@@ -3724,19 +3717,19 @@ c
 c
 c Inclination and node
       ci = hz / h
-      if (abs(ci).lt.1) then
+      if (abs(ci).lt.1.d0) then
         i = acos (ci)
         n = atan2 (hx,-hy)
-        if (n.lt.0) n = n + TWOPI
+        if (n.lt.0.d0) n = n + TWOPI
       else
-        if (ci.gt.0) i = 0.d0
-        if (ci.lt.0) i = PI
+        if (ci.gt.0.d0) i = 0.d0
+        if (ci.lt.0.d0) i = PI
         n = 0.d0
       end if
 c
 c Eccentricity and perihelion distance
       temp = 1.d0  +  s * (v2 / gm  -  2.d0 / r)
-      if (temp.le.0) then
+      if (temp.le.0.d0) then
         e = 0.d0
       else
         e = sqrt (temp)
@@ -3744,7 +3737,7 @@ c Eccentricity and perihelion distance
       q = s / (1.d0 + e)
 c
 c True longitude
-      if (hy.ne.0) then
+      if (hy.ne.0.d0) then
         to = -hx/hy
         temp = (1.d0 - ci) * to
         tmp2 = to * to
@@ -3752,7 +3745,7 @@ c True longitude
       else
         true = atan2(y * ci, x)
       end if
-      if (ci.lt.0) true = true + PI
+      if (ci.lt.0.d0) true = true + PI
 c
       if (e.lt.3.d-8) then
         p = 0.d0
@@ -3761,17 +3754,17 @@ c
         ce = (v2*r - gm) / (e*gm)
 c
 c Mean anomaly for ellipse
-        if (e.lt.1) then
-          if (abs(ce).gt.1) ce = sign(1.d0,ce)
+        if (e.lt.1.d0) then
+          if (abs(ce).gt.1.d0) ce = sign(1.d0,ce)
           bige = acos(ce)
-          if (rv.lt.0) bige = TWOPI - bige
+          if (rv.lt.0.d0) bige = TWOPI - bige
           l = bige - e*sin(bige)
         else
 c
 c Mean anomaly for hyperbola
-          if (ce.lt.1) ce = 1.d0
+          if (ce.lt.1.d0) ce = 1.d0
           bige = log( ce + sqrt(ce*ce-1.d0) )
-          if (rv.lt.0) bige = - bige
+          if (rv.lt.0.d0) bige = - bige
           l = e*sinh(bige) - bige
         end if
 c
@@ -3779,12 +3772,12 @@ c Longitude of perihelion
         cf = (s - r) / (e*r)
         if (abs(cf).gt.1) cf = sign(1.d0,cf)
         f = acos(cf)
-        if (rv.lt.0) f = TWOPI - f
+        if (rv.lt.0.d0) f = TWOPI - f
         p = true - f
         p = mod (p + TWOPI + TWOPI, TWOPI)
       end if
 c
-      if (l.lt.0) l = l + TWOPI
+      if (l.lt.0.d0) l = l + TWOPI
       if (l.gt.TWOPI) l = mod (l, TWOPI)
 c
 c------------------------------------------------------------------------------
@@ -3833,10 +3826,10 @@ c Inclination and node
       if (abs(ci).lt.1) then
         i = acos (ci)
         n = atan2 (hx,-hy)
-        if (n.lt.0) n = n + TWOPI
+        if (n.lt.0.d0) n = n + TWOPI
       else
-        if (ci.gt.0) i = 0.d0
-        if (ci.lt.0) i = PI
+        if (ci.gt.0.d0) i = 0.d0
+        if (ci.lt.0.d0) i = PI
         n = 0.d0
       end if
 
@@ -4507,7 +4500,7 @@ c If collisions occurred, resolve the collision and return a flag
         end if
 c
 c If necessary, continue integrating objects undergoing close encounters
-      if ((tlocal - h0)*h0.lt.0) goto 50
+      if ((tlocal - h0)*h0.lt.0.d0) goto 50
 c
 c Return data for the close-encounter objects to global arrays
       do k = 2, nbs
@@ -4947,9 +4940,9 @@ c Estimate suitable sequence size for the next call to subroutine (Eqs. 15, 16)
       do k = 4, nv
         temp = max( temp, abs( b(7,k) ) )
       end do
-      temp = temp / (72.d0 * abs(t)**7)
+      temp = temp / (72.d0 * abs(t)**7.d0)
       tdid = t
-      if (temp.eq.0) then
+      if (temp.eq.0.d0) then
         t = tdid * 1.4d0
       else
         t = sign( (tol/temp)**(1.d0/9.d0), tdid )
@@ -4957,7 +4950,7 @@ c Estimate suitable sequence size for the next call to subroutine (Eqs. 15, 16)
 c
 c If sequence size for the first subroutine call is too big, go back and redo
 c the sequence using a smaller size.
-      if (dtflag.eq.1.and.abs(t/tdid).lt.1) then
+      if (dtflag.eq.1.and.abs(t/tdid).lt.1.d0) then
         t = t * .8d0
         goto 100
       end if
@@ -5251,7 +5244,7 @@ c
           if (s2.ge.rc2) then
             s_1 = 1.d0 / sqrt(s2)
             tmp2 = s_1 * s_1 * s_1
-          else if (s2.le.0.01*rc2) then
+          else if (s2.le.0.01d0*rc2) then
             tmp2 = 0.d0
           else
             s_1 = 1.d0 / sqrt(s2)
@@ -5390,7 +5383,7 @@ c
         if (s2.lt.rc2) then
           s_1 = 1.d0 / sqrt(s2)
           s_3 = s_1 * s_1 * s_1
-          if (s2.le.0.01*rc2) then
+          if (s2.le.0.01d0*rc2) then
             tmp2 = s_3
           else
             s = 1.d0 / s_1
@@ -6130,7 +6123,7 @@ c For each body...
             c(1:8) = id(j)
             write (c(9:37),'(1p,a3,e11.5,a3,e11.5)') ' r=',rceh(j),
      %        ' d=',rho(j)/rhocgs
-            if (m(j).gt.0) then
+            if (m(j).gt.0.d0) then
               write (c(len+1:len+25),'(a3,e22.15)') ' m=',m(j)*k_2
               len = len + 25
             end if
@@ -6141,13 +6134,13 @@ c JWB added i and j to dmp outputs for obliquity-tracking restart capability
 	  			len = len + 36
 				
             do k = 1, 3
-              if (ngf(k,j).ne.0) then
+              if (ngf(k,j).ne.0.d0) then
                 write (c(len+1:len+16),'(a2,i1,a1,e12.5)') ' a',k,'=',
      %            ngf(k,j)
                 len = len + 16
               end if
             end do
-            if (ngf(4,j).ne.0) then
+            if (ngf(4,j).ne.0.d0) then
               write (c(len+1:len+15),'(a3,e12.5)') ' b=',ngf(4,j)
               len = len + 15
             end if
@@ -6361,14 +6354,14 @@ c Local
 c
 c------------------------------------------------------------------------------
 c
-      if (x.eq.0) then
+      if (x.eq.0.d0) then
         y = .5d0
       else
         ax = abs(x)
         ex = int(log10(ax))
-        if (ax.ge.1) ex = ex + 1
+        if (ax.ge.1.d0) ex = ex + 1
         y = ax*(10.d0**(-ex))
-        if (y.eq.1) then
+        if (y.eq.1.d0) then
           y = y * .1d0
           ex = ex + 1
         end if
@@ -6962,7 +6955,7 @@ c or whether massive Small bodies have different epochs than Big bodies.
       flag1 = .false.
       flag2 = .false.
       do j = nbig + 1, nbod
-        if (m(j).ne.0) then
+        if (m(j).ne.0.d0) then
           if (algor.eq.1) call mio_err (23,mem(81),lmem(81),mem(94),
      %      lmem(94),' ',1,mem(85),lmem(85))
           flag1 = .true.
@@ -7073,8 +7066,8 @@ c
       if (month.gt.2) year = d - 4716
       if (month.le.2) year = d - 4715
 c
-      if (day.gt.32) then
-        day = day - 32
+      if (day.gt.32.d0) then
+        day = day - 32.d0
         month = month + 1
       end if
 c
@@ -7087,9 +7080,9 @@ c
   50  continue
 c
 c Algorithm for negative Julian day numbers (Duffett-Smith doesn't work)
-      x = jd0 - 2232101.5
+      x = jd0 - 2232101.5d0
       f = x - dint(x)
-      if (f.lt.0) f = f + 1.d0
+      if (f.lt.0.d0) f = f + 1.d0
       y = dint(mod(x,1461.d0) + 1461.d0)
       z = dint(mod(y,365.25d0))
       month = int((z + 0.5d0) / 30.61d0)
@@ -7352,11 +7345,11 @@ c
       mio_re2c(1:8) = '        '
       y = (x - xmin) / (xmax - xmin)
 c
-      if (y.ge.1) then
+      if (y.ge.1.d0) then
         do j = 1, 8
           mio_re2c(j:j) = char(255)
         end do
-      else if (y.gt.0) then
+      else if (y.gt.0.d0) then
         z = y
         do j = 1, 8
           z = mod(z, 1.d0) * 224.d0
@@ -7679,7 +7672,7 @@ c Potential energy terms due to pairs of bodies
           dy = x(2,k) - x(2,j)
           dz = x(3,k) - x(3,j)
           r2 = dx*dx + dy*dy + dz*dz
-          if (r2.ne.0) tmp = tmp + m(k) / sqrt(r2)
+          if (r2.ne.0.d0) tmp = tmp + m(k) / sqrt(r2)
         end do
         pe = pe  -  tmp * m(j)
       end do
@@ -7690,11 +7683,11 @@ c Potential energy terms involving the central body
         dy = x(2,j) - x(2,1)
         dz = x(3,j) - x(3,1)
         r2 = dx*dx + dy*dy + dz*dz
-        if (r2.ne.0) pe = pe  -  m(1) * m(j) / sqrt(r2)
+        if (r2.ne.0.d0) pe = pe  -  m(1) * m(j) / sqrt(r2)
       end do
 c
 c Corrections for oblateness
-      if (jcen(1).ne.0.or.jcen(2).ne.0.or.jcen(3).ne.0) then
+      if (jcen(1).ne.0.d0.or.jcen(2).ne.0.d0.or.jcen(3).ne.0.d0) then
         do j = 2, nbig
           r2 = xh(1,j)*xh(1,j) + xh(2,j)*xh(2,j) + xh(3,j)*xh(3,j)
           r_1 = 1.d0 / sqrt(r2)
@@ -7818,14 +7811,14 @@ c Local
          
 c Calculate longitude & inclination of spin vector
          temp = sqrt(s(1,j)*s(1,j) + s(2,j)*s(2,j) + s(3,j)*s(3,j))
-         if (temp.gt.0) then
+         if (temp.gt.0.d0) then
               temp = s(3,j) / temp
-              if (abs(temp).lt.1) then
+              if (abs(temp).lt.1.d0) then
                 is(j) = acos (temp)
                 ns(j) = atan2 (s(1,j), -s(2,j))
               else
-                if (temp.gt.0) is(j) = 0.d0
-                if (temp.lt.0) is(j) = PI
+                if (temp.gt.0.d0) is(j) = 0.d0
+                if (temp.lt.0.d0) is(j) = PI
                 ns(j) = 0.d0
               end if
             else
@@ -7835,7 +7828,7 @@ c Calculate longitude & inclination of spin vector
 	 
 	 obl = acos (cos(inc)*cos(is(j))
      %        + sin(inc)*sin(is(j))*cos(ns(j) - nl))
-         obl = obl*180./PI
+         obl = obl/DR
          if (init.eq.1) then
             obl_max(j) = obl
             obl_min(j) = obl 
@@ -8109,7 +8102,7 @@ c...  for new coords.
         r0 = sqrt(x0*x0 + y0*y0 + z0*z0)
         v0s = vx0*vx0 + vy0*vy0 + vz0*vz0
         u = x0*vx0 + y0*vy0 + z0*vz0
-        alpha = 2.0*mu/r0 - v0s
+        alpha = 2.d0*mu/r0 - v0s
         
 	if (alpha.gt.0.d0) then
            a = mu/alpha
@@ -8122,18 +8115,18 @@ c...  for new coords.
 	   dt = dm/en
 	   if((dm*dm .gt. 0.16d0) .or. (esq.gt.0.36d0)) goto 100
 
-	   if(esq*dm*dm .lt. 0.0016) then
+	   if(esq*dm*dm .lt. 0.0016d0) then
 
                call drift_kepmd(dm,es,ec,xkep,s,c)
-	       fchk = (xkep - ec*s +es*(1.-c) - dm)
+	       fchk = (xkep - ec*s +es*(1.d0-c) - dm)
 
 	       if(fchk*fchk .gt. DANBYB) then
 		  iflg = 1
 		  return
 	       endif
 
-               fp = 1. - ec*c + es*s
-               f = (a/r0) * (c-1.) + 1.
+               fp = 1.d0 - ec*c + es*s
+               f = (a/r0) * (c-1.d0) + 1.d0
                g = dt + (s-xkep)/en
                fdot = - (a/(r0*fp))*en*s
                gdot = (c-1.)/fp + 1.
@@ -8162,10 +8155,10 @@ c...  for new coords.
 100      call drift_kepu(dt,r0,mu,alpha,u,fp,c1,c2,c3,iflg)
 
          if(iflg .eq.0) then
-           f = 1.0 - (mu/r0)*c2
+           f = 1.d0 - (mu/r0)*c2
            g = dt - mu*c3
            fdot = -(mu/(fp*r0))*c1
-           gdot = 1. - (mu/fp)*c2
+           gdot = 1.d0 - (mu/fp)*c2
 
            x = x0*f + vx0*g
            y = y0*f + vy0*g
@@ -8235,13 +8228,13 @@ c...  excellent approx. to sin and cos of x for small x.
         c = sqrt(1.d0 - s*s)
 
 c...    Compute better value for the root using quartic Newton method
-        f = x - ec*s + es*(1.-c) - dm
+        f = x - ec*s + es*(1.d0-c) - dm
         fp = 1. - ec*c + es*s
         fpp = ec*s + es*c
         fppp = ec*c - es*s
         dx = -f/fp
-        dx = -f/(fp + 0.5*dx*fpp)
-        dx = -f/(fp + 0.5*dx*fpp + 0.16666666666666666*dx*dx*fppp)
+        dx = -f/(fp + 0.5d0*dx*fpp)
+        dx = -f/(fp + 0.5d0*dx*fpp + 0.16666666666666666d0*dx*dx*fppp)
         x = x + dx
      
 c...  excellent approx. to sin and cos of x for small x.
@@ -8399,16 +8392,16 @@ c...  Internals:
 c----
 c...  Executable code 
 
-        if (alpha.gt.0.0) then 
+        if (alpha.gt.0.d0) then 
 c...       find initial guess for elliptic motion
 
-            if( dt/r0 .le. 0.4)  then
-              s = dt/r0 - (dt*dt*u)/(2.0*r0*r0*r0)
+            if( dt/r0 .le. 0.4d0)  then
+              s = dt/r0 - (dt*dt*u)/(2.d0*r0*r0*r0)
 	      return
             else
               a = mu/alpha
               en = sqrt(mu/(a*a*a))
-              ec = 1.0 - r0/a
+              ec = 1.d0 - r0/a
               es = u/(en*a*a)
               e = sqrt(ec*ec + es*es)
               y = en*dt - es
@@ -8416,7 +8409,7 @@ c
               call mco_sine (y,sy,cy)
 c
               sigma = dsign(1.d0,(es*cy + ec*sy))
-              x = y + sigma*.85*e
+              x = y + sigma*.85d0*e
               s = x/sqrt(alpha)
 	    endif
 
@@ -8482,13 +8475,13 @@ c----
 c...  Executable code 
 
 c...    To get close approch needed to take lots of iterations if alpha<0
-        if(alpha.lt.0.0) then
+        if(alpha.lt.0.d0) then
            ncmax = NLAG2
         else
            ncmax = NLAG2
         endif
 
-        ln = 5.0
+        ln = 5.d0
 c...    start laguere's method
         do nc =0,ncmax
            x = s*s*alpha
@@ -8498,9 +8491,9 @@ c...    start laguere's method
            c3 = c3*s*s*s
            f = r0*c1 + u*c2 + mu*c3 - dt
            fp = r0*c0 + u*c1 + mu*c2
-           fpp = (-40.0*alpha + mu)*c1 + u*c0
-           ds = - ln*f/(fp + dsign(1.d0,fp)*sqrt(abs((ln - 1.0)*
-     &       (ln - 1.0)*fp*fp - (ln - 1.0)*ln*f*fpp)))
+           fpp = (-40.d0*alpha + mu)*c1 + u*c0
+           ds = - ln*f/(fp + dsign(1.d0,fp)*sqrt(abs((ln - 1.d0)*
+     &       (ln - 1.d0)*fp*fp - (ln - 1.d0)*ln*f*fpp)))
            s = s + ds
 
            fdt = f/dt
@@ -8637,13 +8630,13 @@ c----
 c...  Executable code 
 
 	denom = (mu - alpha*r0)/6.d0
-	a2 = 0.5*u/denom
+	a2 = 0.5d0*u/denom
 	a1 = r0/denom
 	a0 =-dt/denom
 
 	q = (a1 - a2*a2/3.d0)/3.d0
-	r = (a1*a2 -3.d0*a0)/6.d0 - (a2**3)/27.d0
-	sq2 = q**3 + r**2
+	r = (a1*a2 -3.d0*a0)/6.d0 - (a2**3.d0)/27.d0
+	sq2 = q**3.d0 + r**2.d0
 
 	if( sq2 .ge. 0.d0) then
 	   sq = sqrt(sq2)
@@ -8664,7 +8657,7 @@ c...  Executable code
 
 	else
 	   iflg = 1
-	   s = 0
+	   s = 0.d0
 	endif
 
         return
@@ -8705,7 +8698,7 @@ c----
 c...  Executable code 
 
       n = 0
-      xm = 0.1
+      xm = 0.1d0
       do while(abs(x).ge.xm)
          n = n + 1
          x = x * .25d0
@@ -8726,16 +8719,16 @@ c
      %   + 1.984126984126984d-4*x2  - 8.333333333333333d-3*x
      %   + 1.666666666666667d-1
 c
-      c1 = 1. - x*c3
-      c0 = 1. - x*c2
+      c1 = 1.d0 - x*c3
+      c0 = 1.d0 - x*c2
 c
       if(n.ne.0) then
          do i=n,1,-1
             c3 = (c2 + c0*c3)*.25d0
             c2 = c1*c1*.5d0
             c1 = c0*c1
-            c0 = 2.*c0*c0 - 1.
-            x = x * 4.
+            c0 = 2.d0*c0*c0 - 1.d0
+            x = x * 4.d0
           enddo
        endif
 
@@ -8990,9 +8983,9 @@ c  Begin with a reasonable guess based on solving the cubic for small F
 
 	a = 6.d0*(e-1.d0)/e
 	b = -6.d0*capn/e
-	sq = sqrt(0.25*b*b +a*a*a/27.d0)
-	biga = (-0.5*b + sq)**0.3333333333333333d0
-	bigb = -(+0.5*b + sq)**0.3333333333333333d0
+	sq = sqrt(0.25d0*b*b +a*a*a/27.d0)
+	biga = (-0.5d0*b + sq)**0.3333333333333333d0
+	bigb = -(+0.5d0*b + sq)**0.3333333333333333d0
 	x = biga + bigb
 c	write(6,*) 'cubic = ',x**3 +a*x +b
 	orbel_flon = x
@@ -9077,7 +9070,7 @@ c...  Executable code
 	if (q.lt.1.d-3) then
 	   orbel_zget = q*(1.d0 - (q*q/3.d0)*(1.d0 -q*q))
 	else
-	   x = 0.5d0*(3.d0*q + sqrt(9.d0*(q**2) +4.d0))
+	   x = 0.5d0*(3.d0*q + sqrt(9.d0*(q**2.d0) + 4.d0))
 	   tmp = x**(1.d0/3.d0)
 	   orbel_zget = tmp - 1.d0/tmp
 	endif
