@@ -8,3 +8,5 @@ Modifications so far:
 - the param.in file now requires one of the following argument keywords to specify the spin-tracking algorithm: "spin", "Spin", "SPIN", "spn", or "SPN"
 
 - following Bolmont et al. (2015), general relativisitic forces between the central body and each big body are now included if the user specifies "yes" to the general relativity option in the param.in file
+
+- double precision has been added everywhere in the smercury-T.for and element6.for files
