@@ -156,7 +156,7 @@
 156 43  style (Cartesian, Asteroidal, Cometary) = 
 157 20  epoch (in days) = 
 158 35 ) Important integration parameters:
-159 48  algorithm (MVS, BS, BS2, RADAU, HYBRID etc) = 
+159 48  algorithm (MVS, BS, BS2, RADAU, HYBRID, SPIN, etc) = 
 160 21  start time (days) = 
 161 20  stop time (days) = 
 162 26  output interval (days) = 
@@ -170,8 +170,8 @@
 170 51  express time relative to integration start time = 
 171 20  output precision = 
 172 24  < Not used at present > 
-173 37  include relativity in integration = 
-174 30  include user-defined force = 
+173 37  < Not used at present >  
+174 30  include user-defined force (general relativity) = 
 175 52 ) These parameters do not need to be adjusted often:
 176 26  ejection distance (AU) = 
 177 31  radius of central body (AU) = 
