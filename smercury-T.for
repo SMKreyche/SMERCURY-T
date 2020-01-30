@@ -1719,7 +1719,8 @@ c Check for collisions with the central body
         end if
 c
 c If inside the central body, or passing through pericentre, use 2-body approx.
-        if ((rv0*h.le.0.d0.and.rv1*h.ge.0.d0).or.min(rr0,rr1).le.rcen2) then
+        if ((rv0*h.le.0.d0.and.rv1*h.ge.0.d0).or.min(rr0,rr1).le.rcen2)
+     %  then
           if (algor.eq.11) then
             hx = xu0(2,j) * vu0(3,j)  -  xu0(3,j) * vu0(2,j)
             hy = xu0(3,j) * vu0(1,j)  -  xu0(1,j) * vu0(3,j)
@@ -3486,11 +3487,12 @@ c
       ss = 1.d0
       cc = 1.d0
 c
-      ss = x*x2/6.d0*(1.d0 - x2/20.d0*(1.d0 - x2/42.d0*(1.d0 - x2/72.d0*(1.d0 -
-     %   x2/110.d0*(1.d0 - x2/156.d0*(1.d0 - x2/210.d0*(1.d0 - x2/272.d0)))))))
-      cc =   x2/2.d0*(1.d0 - x2/12.d0*(1.d0 - x2/30.d0*(1.d0 - x2/56.d0*(1.d0 -
-     %   x2/ 90.d0*(1.d0 - x2/132.d0*(1.d0 - x2/182.d0*(1.d0 - x2/240.d0*(1.d0 -
-     %   x2/306.d0))))))))
+      ss = x*x2/6.d0*(1.d0 - x2/20.d0*(1.d0 - x2/42.d0*(1.d0 - 
+     % x2/72.d0*(1.d0 - x2/110.d0*(1.d0 - x2/156.d0*(1.d0 - 
+     % x2/210.d0*(1.d0 - x2/272.d0)))))))
+      cc =   x2/2.d0*(1.d0 - x2/12.d0*(1.d0 - x2/30.d0*(1.d0 - 
+     % x2/56.d0*(1.d0 - x2/ 90.d0*(1.d0 - x2/132.d0*(1.d0 - 
+     % x2/182.d0*(1.d0 - x2/240.d0*(1.d0 - x2/306.d0))))))))
 c
       if (big) then
         z1 = cc + z3 - 1.d0
