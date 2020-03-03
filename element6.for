@@ -215,13 +215,20 @@ c
 c Calculate spin rate and longitude & inclination of spin vector
             temp = sqrt(s(1)*s(1) + s(2)*s(2) + s(3)*s(3))
             if (temp.gt.0.d0) then
-              call mce_spin (1.d0,el(18,k)*K2,temp*K2,el(21,k)*
-     %            rhocgs,el(20,k))
-	      el(20,k) = temp*K2
+              if (j.gt.nbig) then
+                call mce_spin (1.d0,el(18,1)*K2,temp*K2,el(21,1)*
+     %                         rhocgs,el(20,k))
+              else
+                call mce_spin (1.d0,el(18,k)*K2,temp*K2,el(21,k)*
+     %                         rhocgs,el(20,k))
+              end if
+c	          el(20,k) = temp*K2
+
               temp = s(3) / temp
               if (abs(temp).lt.1) then
                 is(k) = acos (temp)
                 ns(k) = atan2 (s(1), -s(2))
+                if (ns(k).lt.0) ns(k) = ns(k) + TWOPI
               else
                 if (temp.gt.0.d0) is(k) = 0.d0
                 if (temp.lt.0.d0) is(k) = PI
@@ -467,8 +474,9 @@ c
       else if (timestyle.eq.3) then
         write (10,'(/,a,f19.6,/)') ' Time (years): ',t1
       end if
-      write (10,'(2a,/)') '              a        e       i      mass',
-     %  '    Rot/day  Obl'
+c-----------------------------------------------------------------------
+      write (10,'(2a,/)') '            a      e          i',
+     %  '      mass      Rot/day   Obl   is   ns'
 c
 c Sort surviving objects in order of increasing semi-major axis
       do j = 1, nbod
@@ -481,13 +489,14 @@ c Write values of a, e, i and m for surviving objects in an output file
       do j = 1, nbod
         k = code(iback(j))
         write (10,213) id(k),el(1,k),el(2,k),el(3,k),el(18,k),el(20,k),
-     %      el(19,k)
+     %      el(19,k), el(23,k), el(24,k)
       end do
 c
 c------------------------------------------------------------------------------
-c
 c Format statements
- 213  format (1x,a8,1x,f8.4,1x,f8.6,1x,f8.4,1p,e11.4,0p,1x,f6.3,1x,f6.2)
+c-----------------------------------------------------------------------
+ 213  format (1x,a8,1x,f8.4,1x,f8.6,1x,f8.4,1p,e11.4,0p,1x,f6.3,1x,f6.2,
+     %        1x,f6.2,1x,f6.2)
 c
       end
 c
