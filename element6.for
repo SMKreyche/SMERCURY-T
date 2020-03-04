@@ -342,14 +342,13 @@ c Put Cartesian coordinates into element arrays
             el(13,k) = v(1,l)
             el(14,k) = v(2,l)
             el(15,k) = v(3,l)
-	    el(23,k) = mod(is(k) / DR,360.d0)
-	    el(24,k) = mod(ns(k) / DR,360.d0)			
-				
+		
 c Convert to Keplerian orbital elements
             gm = (mcen + el(18,k)) * K2
             call mco_x2el (gm,el(10,k),el(11,k),el(12,k),el(13,k),
      %        el(14,k),el(15,k),el(8,k),el(2,k),el(3,k),el(7,k),
      %        el(5,k),el(6,k))
+
 				if (j .ge. nbig + 1) then
 					el(1,k) = el(1,code(1))
 					el(2,k) = el(2,code(1))
@@ -357,9 +356,10 @@ c Convert to Keplerian orbital elements
 					el(4,k) = el(4,code(1)) * DR
 					el(5,k) = el(5,code(1)) * DR
 					el(6,k) = el(6,code(1)) * DR
+					el(7,k) = el(7,code(1)) * DR
 				else
-	            el(1,k) = el(8,k) / (1.d0 - el(2,k))
-	            el(4,k) = mod(el(7,k) - el(5,k) + TWOPI, TWOPI)
+                    el(1,k) = el(8,k) / (1.d0 - el(2,k))
+                    el(4,k) = mod(el(7,k) - el(5,k) + TWOPI, TWOPI)
 				endif
 	         el(9,k) = el(1,k) * (1.d0 + el(2,k))
 				
@@ -382,8 +382,11 @@ c Convert angular elements from radians to degrees
             do l = 3, 7
               el(l,k) = mod(el(l,k) / DR, 360.d0)
             end do
-            el(17,k) = el(17,k) / DR
-            el(19,k) = el(19,k) / DR
+
+            el(17,k) = mod(el(17,k) / DR, 360.d0)
+            el(19,k) = mod(el(19,k) / DR, 360.d0)
+            el(23,k) = mod(is(k) / DR, 360.d0)
+            el(24,k) = mod(ns(k) / DR, 360.d0)	
           end do
 c
 c Convert time to desired format
