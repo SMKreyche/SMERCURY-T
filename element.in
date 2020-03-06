@@ -12,7 +12,7 @@
  express time relative to integration start time = yes
 )---------------------------------------------------------------------
 ) Output format? (e.g. a8.4 => semi-major axis with 8 digits & 4 dec. places)
- a20.16 e20.16 i20.16 g20.16 n20.16 l20.16 p20.16 o20.16
+ a20.16 e20.16 i20.16 g20.16 n20.16 l20.16 p20.16 o20.16 t20.16
 )---------------------------------------------------------------------
 ) Which bodies do you want? (List one per line or leave blank for all bodies)
 )

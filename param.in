@@ -8,7 +8,7 @@
  stop time (days) = +365.25d6
  output interval (days) = 365.25d2
  timestep (days) = 4.4d0
- accuracy parameter=1.d-12
+ accuracy parameter=1.d-10
 )---------------------------------------------------------------------
 ) Integration options:
 )---------------------------------------------------------------------
@@ -26,10 +26,10 @@
 )---------------------------------------------------------------------
  ejection distance (AU) = 100.d0
  radius of central body (AU) = 0.005d0
- central mass (solar) = 1.0d0
+ central mass (Solar masses) = 1.0d0
  central J2 = 0.d0
- central J3 = 0.d0
  central J4 = 0.d0
+ central J6 = 0.d0
  < Not used at present >
  giant-planet gas accretion rate = 6760.d0
  Hybrid integrator changeover (AU) = 0.05d0

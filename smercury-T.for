@@ -6231,11 +6231,7 @@ c Integration options
           write (33,'(2a)') mem(171)(1:lmem(171)),mem(8)(1:lmem(8))
         end if
         write (33,'(a)') mem(172)(1:lmem(172))
-        if (opt(7).eq.1) then
-          write (33,'(2a)') mem(173)(1:lmem(173)),mem(6)(1:lmem(6))
-        else
-          write (33,'(2a)') mem(173)(1:lmem(173)),mem(5)(1:lmem(5))
-        end if
+        write (33,'(a)') mem(173)(1:lmem(173))
         if (opt(8).eq.1) then
           write (33,'(2a)') mem(174)(1:lmem(174)),mem(6)(1:lmem(6))
         else
