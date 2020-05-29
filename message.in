@@ -85,7 +85,7 @@
  85 57        Check the file containing integration parameters.
  86 22        Check files.in
  87 27 This file already exists:  
- 88 34 This file is needed to continue:  
+ 88 33 This file is needed to continue:  
  89 30 This filename is duplicated: 
  90 40 The total number of bodies exceeds NMAX.
  91 68 Data style on first line must be Cartesian, Asteroidal or Cometary
