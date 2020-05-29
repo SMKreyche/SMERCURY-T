@@ -41,9 +41,9 @@
  41 40    Includes collisions:
  42 40    Includes fragmentation: 
  43  0 
- 44  0 
- 45 40    Includes relativity: 
- 46 40    Includes user-defined force routine: 
+ 44 41    Includes obliquity tides (phase lag):
+ 45 40    Includes obliquity tides (time lag): 
+ 46 61    Includes user-defined force routine (general relativity): 
  47 10 barycentre 
  48 12 central body
  49  0 
@@ -105,8 +105,8 @@
 105 42 Central-body radius exceeds maximum radius. 
 106 68 Maximum/Central radius is large. Output precision will be degraded. 
 107 58 Coordinate origin must be Central, Barycentric or Jacobi.
-108  0 
-109  0 
+108 53 You cannot select yes for both obliquity tide models
+109 58 You cannot integrate obliquity tides using this algorithm
 110  0 
 111  0 
 112  0 
@@ -169,8 +169,8 @@
 169 33  express time in days or years = 
 170 51  express time relative to integration start time = 
 171 20  output precision = 
-172 24  < Not used at present > 
-173 24  < Not used at present >  
+172 45  include obliquity tides (phase lag model) = 
+173 44  include obliquity tides (time lag model) =  
 174 51  include user-defined force (general relativity) = 
 175 52 ) These parameters do not need to be adjusted often:
 176 26  ejection distance (AU) = 

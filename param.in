@@ -18,8 +18,8 @@
  express time in days or years = years
  express time relative to integration start time = yes
  output precision = high
- < Not used at present >
- < Not used at present >
+ include obliquity tides (phase lag model) = no
+ include obliquity tides (time lag model) = no
  include user-defined force (general relativity) = yes
 )---------------------------------------------------------------------
 ) These parameters do not need to be adjusted often:

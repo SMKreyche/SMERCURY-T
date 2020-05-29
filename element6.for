@@ -21,10 +21,10 @@ c
       integer itmp,i,j,k,l,iback(NMAX),precision,lenin
       integer nmaster,nopen,nwait,nbig,nsml,nbod,nsub,lim(2,100)
       integer year,month,timestyle,line_num,lenhead,lmem(NMESS)
-      integer nchar,algor,centre,allflag,firstflag,ninfile,nel,iel(24)
+      integer nchar,algor,centre,allflag,firstflag,ninfile,nel,iel(29)
       integer nbod1,nbig1,unit(NMAX),code(NMAX),master_unit(NMAX)
       real*8 time,teval,t0,t1,tprevious,rmax,rcen,rfac,rhocgs,temp
-      real*8 mcen,jcen(3),el(24,NMAX),s(3),is(NMAX),ns(NMAX),a(NMAX)
+      real*8 mcen,jcen(3),el(29,NMAX),s(3),is(NMAX),ns(NMAX),a(NMAX)
       real*8 mio_c2re, mio_c2fl,fr,theta,phi,fv,vtheta,vphi,gm
       real*8 x(3,NMAX),v(3,NMAX),xh(3,NMAX),vh(3,NMAX),m(NMAX)
       logical test
@@ -191,7 +191,7 @@ c
 c Read in strings containing compressed data for each object
           do j = 1, nbig + nsml
             line_num = line_num + 1
-            read (10,'(a)',err=666) c(j)(1:51)
+            read (10,'(a)',err=666) c(j)(1:75)
           end do
 c
 c Create input format list
@@ -203,6 +203,7 @@ c Create input format list
           write (fin(3:4),'(i2)') lenin
 c
 c For each object decompress its name, code number, mass, spin and density
+c Added its scaled moment of inertia -- SMK
           do j = 1, nbig + nsml
             k = int(.5d0 + mio_c2re(c(j)(1:8),0.d0,11239424.d0,3))
             id(k) = c(j)(4:11)
@@ -211,16 +212,21 @@ c For each object decompress its name, code number, mass, spin and density
             s(2) = mio_c2fl (c(j)(28:35))
             s(3) = mio_c2fl (c(j)(36:43))
             el(21,k) = mio_c2fl (c(j)(44:51))
+            el(25,k) = mio_c2fl (c(j)(52:59)) 
+            el(28,k) = mio_c2fl (c(j)(60:67))
+            el(29,k) = (mio_c2fl (c(j)(68:75)))*86400.d0
 c
 c Calculate spin rate and longitude & inclination of spin vector
             temp = sqrt(s(1)*s(1) + s(2)*s(2) + s(3)*s(3))
             if (temp.gt.0.d0) then
               if (j.gt.nbig) then
-                call mce_spin (1.d0,el(18,1)*K2,temp*K2,el(21,1)*
-     %                         rhocgs,el(20,k))
+                call mce_spin (el(18,1),el(25,k),temp,
+     %                         el(21,1)*AU*AU*AU/MSUN,el(26,k),
+     %                         el(20,k),el(27,k))      
               else
-                call mce_spin (1.d0,el(18,k)*K2,temp*K2,el(21,k)*
-     %                         rhocgs,el(20,k))
+                call mce_spin (el(18,k),el(25,k),temp,
+     %                         el(21,k)*AU*AU*AU/MSUN,el(26,k),
+     %                         el(20,k),el(27,k))
               end if
 c	          el(20,k) = temp*K2
 
@@ -236,6 +242,8 @@ c	          el(20,k) = temp*K2
               end if
             else
               el(20,k) = 0.d0
+              el(26,k) = 0.d0
+              el(27,k) = 0.d0
               is(k) = 0.d0
               ns(k) = 0.d0
             end if
@@ -477,9 +485,9 @@ c
       else if (timestyle.eq.3) then
         write (10,'(/,a,f19.6,/)') ' Time (years): ',t1
       end if
-c-----------------------------------------------------------------------
+c
       write (10,'(2a,/)') '            a      e          i',
-     %  '      mass      Rot/day   Obl   is   ns'
+     %  '      mass         spnP    eqR    obl    is     ns'
 c
 c Sort surviving objects in order of increasing semi-major axis
       do j = 1, nbod
@@ -492,14 +500,14 @@ c Write values of a, e, i and m for surviving objects in an output file
       do j = 1, nbod
         k = code(iback(j))
         write (10,213) id(k),el(1,k),el(2,k),el(3,k),el(18,k),el(20,k),
-     %      el(19,k), el(23,k), el(24,k)
+     %         el(26,k),el(19,k),el(23,k),el(24,k)
       end do
 c
 c------------------------------------------------------------------------------
 c Format statements
 c-----------------------------------------------------------------------
- 213  format (1x,a8,1x,f8.4,1x,f8.6,1x,f8.4,1p,e11.4,0p,1x,f6.3,1x,f6.2,
-     %        1x,f6.2,1x,f6.2)
+ 213  format (1x,a8,1x,f8.4,1x,f8.6,1x,f8.4,1p,e11.4,0p,1x,f6.2,1x,f7.2,
+     %        1x,f6.2,1x,f6.2,1x,f6.2)
 c
       end
 c
@@ -559,46 +567,59 @@ c      MCE_SPIN.FOR    (ErikSoft  2 December 1999)
 c
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c
-c Author: John E. Chambers
+c Author: Steven M. Kreyche (21 April 2020)
 c
-c Calculates the spin rate (in rotations per day) for a fluid body given
-c its mass, spin angular momentum and density. The routine assumes the
-c body is a MacClaurin ellipsoid, whose axis ratio is defined by the
-c quantity SS = SQRT(A^2/C^2 - 1), where A and C are the
-c major and minor axes.
-c
+c Returns the spin period, spnP, [hr] and the equatorial radius, eqR, 
+c [km] for an axisymmetric rigid body according to appendix A of Lissauer et al.  
+c (2012), with the use of Cardano's general cubic formula
 c------------------------------------------------------------------------------
 c
-      subroutine mce_spin (g,mass,spin,rho,rote)
+      subroutine mce_spin (m,C_MR2,spin,rho,eqR,spnP,J_2)
+c
+c m = mass [solar masses]
+c C_MR2 = the scaled moment of inertia [unitless]
+c spin = spin angular momentum magnitude [solar masses*AU^2 / day]
+c rho = density [solar masses / AU^3]
+c eqR = equatorial radius [km]
+c spnP = spin rotation period [hr]
 c
       implicit none
       include 'mercury.inc'
 c
 c Input/Output
-      real*8 g,mass,spin,rho,rote
-c
+      real*8 m,C_MR2,spin,rho,eqR,spnP,J_2
 c Local
-      integer k
-      real*8 ss,s2,f,df,z,dz,tmp0,tmp1,t23
+      real*8 D,a,b,c,Delta0,Delta1,val,rate,q
 c
 c------------------------------------------------------------------------------
 c
-      t23 = 2.d0 / 3.d0
-      tmp1 = spin * spin / (2.d0 * PI * rho * g) 
-     %     * ( 250.d0*PI*PI*rho*rho / (9.d0*mass**5) )**t23
+c Gathering the parts
+      D = (25.d0/4.d0)*(1.5d0*C_MR2 - 1.d0)**2.d0 + 1.d0
+      a = -(40.d0*spin**2.d0) / (K2*m**3.d0*D*C_MR2**2.d0)
+      b = (100.d0*spin**4.d0)/(K2**2.d0*m**6.d0*D**2.d0*C_MR2**4.d0)
+      c = (30.d0*spin**2.d0) / (PI*rho*K2*D*m**2.d0*C_MR2**2.d0)
+      Delta0 = b**2.d0
+      Delta1 = 2.d0*b**3.d0 + 27.d0*a**2.d0*c
 c
-c Calculate SS using Newton's method
-      ss = 1.d0
-      do k = 1, 20
-        s2 = ss * ss
-        tmp0 = (1.d0 + s2)**t23
-        call m_sfunc (ss,z,dz)
-        f = z * tmp0  -  tmp1
-        df = tmp0 * ( dz  +  4.d0 * ss * z / (3.d0*(1.d0 + s2)) )
-        ss = ss - f/df
-      end do
+c Conditional parameter to solve cubic with Cardano's formula 
+      val = ((Delta1 + sqrt(Delta1**2.d0 - 4.d0*Delta0**3.d0)) / 2.d0)
+     %      **(1.d0/3.d0)
+      if (val.eq.0.d0) then
+        val = ((Delta1 - sqrt(Delta1**2.d0 - 4.d0*Delta0**3.d0)) / 2.d0)
+     %        **(1.d0/3.d0)
+      end if
+c    
+c Calculating R_eq, then find rate from angular momentum
+      eqR = -(1.d0/(3.d0*a)) * (b + val + Delta0/val)
+      rate = spin/(C_MR2*m*eqR**2.d0)
 c
-      rote = sqrt(TWOPI * g * rho * z) / TWOPI
+c Now can calculate planetary J2 value
+      q = (rate**2.d0 * eqR**3.d0) / (K2*m)
+      J_2 = (1.d0/3.d0) * ((5.d0*q)/D - q)
+c
+c Converting eqR to [km] and find spnP in [hr]
+      eqR = eqR*AU/1.d5
+      spnP = 1.d0/(rate/TWOPI/24.)
 c
 c------------------------------------------------------------------------------
 c
@@ -1792,21 +1813,24 @@ c
       include 'mercury.inc'
 c
 c Input/Output
-      integer timestyle,nel,iel(24),lenhead
+      integer timestyle,nel,iel(29),lenhead
       character*250 string,header,fout
 c
 c Local
       integer i,j,pos,nsub,lim(2,20),formflag,lenfout,f1,f2,itmp
-      character*1 elcode(24)
-      character*4 elhead(24)
+      character*1 elcode(29)
+      character*4 elhead(29)
 c
 c------------------------------------------------------------------------------
 c
+c-----------------------------------------------------------------------
       data elcode/ 'a','e','i','g','n','l','p','q','b','x','y','z',
-     %  'u','v','w','r','f','m','o','s','d','c','h','t'/
-      data elhead/ '  a ','  e ','  i ','peri','node','  M ','long',
-     %  '  q ','  Q ','  x ','  y ','  z ',' vx ',' vy ',' vz ','  r ',
-     %  '  f ','mass','oblq','spin','dens','comp','is','ns'/
+     %  'u','v','w','r','f','m','o','s','d','c','h','t','j','k','1','2',
+     %  '3'/
+      data elhead/ 'a   ','e   ','i   ','omga','Omga','M   ','pmga',
+     %  'q   ','Q   ','x   ','y   ','z   ','vx  ','vy  ','vz  ','r   ',
+     %  'f   ','mass','obl ','spnP','dens','comp','is  ','ns  ',
+     %  'CMR2','eqR ','J2  ','love','tlag'/
 c
 c Initialize header to a blank string
       do i = 1, 250
@@ -1834,7 +1858,7 @@ c
 c Identify the required elements
       call mio_spl (250,string,nsub,lim)
       do i = 1, nsub
-        do j = 1, 24
+        do j = 1, 29
           if (string(lim(1,i):lim(1,i)).eq.elcode(j)) iel(i) = j
         end do
       end do
