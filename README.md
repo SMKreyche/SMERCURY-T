@@ -21,4 +21,4 @@ Modifications so far:
 
 - the big.in and small.in files require the input of the body's tidal potential love number (k=) and time lag duration (t=) in the header if using time lag obliquity tides
 
-- element6.for includes changes to output new relevent parameters of each body with key letters in element.in such as their radii (k), spin periods (s), moment of inertia coefficents (c), J2 coefficients (j), spin angular momentum components (sx,sy,sz) = (1,2,3), which requried a redone new mce_spin.for subroutine that recalculates what was calculated in the spin subroutine of smercury-T.for
+- element6.for includes changes to output new relevent parameters of each body with key letters in element.in such as their radii (k), spin periods (s), moment of inertia coefficents (c), J2 coefficients (j), spin inclination (h), spin nodal angle (t), spin angular momentum components (sx,sy,sz) = (1,2,3), which requried a redone new mce_spin.for subroutine that recalculates what was calculated in the spin subroutine of smercury-T.for
