@@ -24,28 +24,28 @@ Modifications so far:
 - element6.for includes changes to output new relevent parameters of each body with key letters in element.in such as their radii (k), spin periods (s), moment of inertia coefficients (c), J2 coefficients (j), spin inclination (h), spin nodal angle (t), spin angular momentum components (sx,sy,sz) = (1,2,3), which requried a redone new mce_spin.for subroutine that recalculates what was calculated in the spin subroutine of smercury-T.for
 
 The updated code letters are:
-                            -a = semi-major axis (AU)
-                            -b = apocentre distance (AU, b is short for Big q)
-                            -c = moment of inertia coefficient (C/MR^2)
-                            -d = density (g per cm^3)
-                            -e = eccentricity
-                            -f = true anomaly (degrees)
-                            -g = argument of perihelion (degrees)
-                            -h = spin vector inclination (degrees)
-                            -i = inclination (degrees)
-                            -j = J2 oblateness coefficient 
-                            -k = radius (km)
-                            -l = mean anomaly (degrees)
-                            -m = mass (solar masses)
-                            -n = longitude of ascending node (degrees)
-                            -o = obliquity (degrees)
-                            -p = longitude of perihelion (degrees)
-                            -q = pericentre distance (AU)
-                            -r = radial distance (AU)
-                            -s = spin period (days)
-                            -t = spin vector azimuth (degrees)
-                            -u, v or w = Cartesian velocities vx, vy or vz (AU/day)
-                            -x, y or z = Cartesian coordinates x, y or z (AU)
-                            -1, 2, or 3 = spin vector components sx, sy, or sz (solar masses AU^2 /day)
+-a = semi-major axis (AU)
+-b = apocentre distance (AU, b is short for Big q)
+-c = moment of inertia coefficient (C/MR^2)
+-d = density (g per cm^3)
+-e = eccentricity
+-f = true anomaly (degrees)
+-g = argument of perihelion (degrees)
+-h = spin vector inclination (degrees)
+-i = inclination (degrees)
+-j = J2 oblateness coefficient 
+-k = radius (km)
+-l = mean anomaly (degrees)
+-m = mass (solar masses)
+-n = longitude of ascending node (degrees)
+-o = obliquity (degrees)
+-p = longitude of perihelion (degrees)
+-q = pericentre distance (AU)
+-r = radial distance (AU)
+-s = spin period (days)
+-t = spin vector azimuth (degrees)
+-u, v or w = Cartesian velocities vx, vy or vz (AU/day)
+-x, y or z = Cartesian coordinates x, y or z (AU)
+-1, 2, or 3 = spin vector components sx, sy, or sz (solar masses AU^2 /day)
 
 - smercury-T.for now includes a tidal tolerance scheme for the tidal time lag option. This scheme allows the user to specify a tolerance value in the param.in file which controls the frequency at which the tidal torques are added to the spin vector based on a comparision of the tidal torque magnitude to the spin vector magnitude, which in turn also controls how often the planet radius and moment of inertia tensor needs to be updated. 
