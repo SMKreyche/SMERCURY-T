@@ -23,30 +23,30 @@
  23 48 Hybrid symplectic integrator (mixed coordinates)
  24 44 Hybrid symplectic (close binary coordinates)
  25 43 Hybrid symplectic (wide binary coordinates)
- 26 32    Integration start epoch:
- 27 32    Integration stop  epoch:
- 28 32    Output interval:
+ 26 28    Integration start epoch:
+ 27 28    Integration stop  epoch:
+ 28 28    Output interval:
  29 32    Element origin:
- 30 31    Initial timestep:
- 31 36    Accuracy parameter:
- 32 36    Central mass:
- 33 36    J_2:
- 34 36    J_4:
- 35 36    J_6:
- 36 36    Ejection distance:
- 37 36    Radius of central body:
- 38 29    Number of Big bodies:
- 39 29    Number of Small bodies:
- 40 37    Output precision: 
- 41 40    Includes collisions:
- 42 40    Includes fragmentation: 
- 43  0 
- 44 41    Includes obliquity tides (phase lag):
- 45 40    Includes obliquity tides (time lag): 
+ 30 27    Initial timestep:
+ 31 27    Accuracy parameter:
+ 32 27    Central mass:
+ 33 27    J_2:
+ 34 27    J_4:
+ 35 27    J_6:
+ 36 27    Ejection distance:
+ 37 27    Radius of central body:
+ 38 27    Number of Big bodies:  
+ 39 27    Number of Small bodies:
+ 40 28    Output precision: 
+ 41 61    Includes collisions:
+ 42 61    Includes fragmentation: 
+ 43 27    Tidal tolerance:
+ 44 61    Includes obliquity tides (phase lag):
+ 45 61    Includes obliquity tides (time lag): 
  46 61    Includes user-defined force routine (general relativity): 
  47 10 barycentre 
  48 12 central body
- 49  0 
+ 49  0   
  50  0 
  51 30            Integration details
  52 30            -------------------
@@ -180,12 +180,12 @@
 180 14  central J4 = 
 181 14  central J6 = 
 182 24  < Not used at present > 
-183 24  < Not used at present > 
+183 0
 184 45  Hybrid integrator changeover (Hill radii) = 
 185 42  number of timesteps between data dumps = 
 186 48  number of timesteps between periodic effects = 
 187 41  origin (Central, Barycentric, Jacobi) = 
-188  0 
+188 19  tidal tolerance =
 189  0 
 190  0 
 191  0 

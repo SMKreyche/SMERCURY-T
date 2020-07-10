@@ -1,3 +1,4 @@
+c-----------------------------------------------------------------------
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c
 c      ELEMENT6.FOR    (ErikSoft   5 June 2001)
@@ -191,7 +192,7 @@ c
 c Read in strings containing compressed data for each object
           do j = 1, nbig + nsml
             line_num = line_num + 1
-            read (10,'(a)',err=666) c(j)(1:75)
+            read (10,'(a)',err=666) c(j)(1:59)
           end do
 c
 c Create input format list
@@ -212,21 +213,22 @@ c Added its scaled moment of inertia -- SMK
             s(2) = mio_c2fl (c(j)(28:35))
             s(3) = mio_c2fl (c(j)(36:43))
             el(21,k) = mio_c2fl (c(j)(44:51))
-            el(25,k) = mio_c2fl (c(j)(52:59)) 
-            el(28,k) = mio_c2fl (c(j)(60:67))
-            el(29,k) = (mio_c2fl (c(j)(68:75)))*86400.d0
+            el(22,k) = mio_c2fl (c(j)(52:59)) 
+            el(27,k) = s(1)
+            el(28,k) = s(2)
+            el(29,k) = s(3)
 c
 c Calculate spin rate and longitude & inclination of spin vector
             temp = sqrt(s(1)*s(1) + s(2)*s(2) + s(3)*s(3))
             if (temp.gt.0.d0) then
               if (j.gt.nbig) then
-                call mce_spin (el(18,1),el(25,k),temp,
-     %                         el(21,1)*AU*AU*AU/MSUN,el(26,k),
-     %                         el(20,k),el(27,k))      
+                call mce_spin (el(18,1),el(22,k),temp,
+     %                         el(21,1)*AU*AU*AU/MSUN,el(25,k),
+     %                         el(20,k),el(26,k))      
               else
-                call mce_spin (el(18,k),el(25,k),temp,
-     %                         el(21,k)*AU*AU*AU/MSUN,el(26,k),
-     %                         el(20,k),el(27,k))
+                call mce_spin (el(18,k),el(22,k),temp,
+     %                         el(21,k)*AU*AU*AU/MSUN,el(25,k),
+     %                         el(20,k),el(26,k))
               end if
 c	          el(20,k) = temp*K2
 
@@ -242,8 +244,8 @@ c	          el(20,k) = temp*K2
               end if
             else
               el(20,k) = 0.d0
+              el(25,k) = 0.d0
               el(26,k) = 0.d0
-              el(27,k) = 0.d0
               is(k) = 0.d0
               ns(k) = 0.d0
             end if
@@ -486,8 +488,9 @@ c
         write (10,'(/,a,f19.6,/)') ' Time (years): ',t1
       end if
 c
-      write (10,'(2a,/)') '            a      e          i',
-     %  '      mass         spnP    eqR    obl    is     ns'
+c-----------------------------------------------------------------------
+      write (10,'(2a,/)') '          mass        a      e          ',
+     %  'i         spnP    eqR  J2         obl'
 c
 c Sort surviving objects in order of increasing semi-major axis
       do j = 1, nbod
@@ -499,15 +502,15 @@ c
 c Write values of a, e, i and m for surviving objects in an output file
       do j = 1, nbod
         k = code(iback(j))
-        write (10,213) id(k),el(1,k),el(2,k),el(3,k),el(18,k),el(20,k),
-     %         el(26,k),el(19,k),el(23,k),el(24,k)
+        write (10,213) id(k),el(18,k),el(1,k),el(2,k),el(3,k),el(20,k),
+     %         el(25,k),el(26,k),el(19,k)
       end do
 c
 c------------------------------------------------------------------------------
 c Format statements
 c-----------------------------------------------------------------------
- 213  format (1x,a8,1x,f8.4,1x,f8.6,1x,f8.4,1p,e11.4,0p,1x,f6.2,1x,f7.2,
-     %        1x,f6.2,1x,f6.2,1x,f6.2)
+ 213  format (1x,a8,1p,e11.4,0p,f8.4,1x,f8.6,1x,f8.4,1x,f7.2,1x,f7.2,
+     %        1p,e11.4,0p,f5.2)
 c
       end
 c
@@ -589,15 +592,15 @@ c
 c Input/Output
       real*8 m,C_MR2,spin,rho,eqR,spnP,J_2
 c Local
-      real*8 D,a,b,c,Delta0,Delta1,val,rate,q
+      real*8 D,a,b,c,Delta0,Delta1,val,rate
 c
 c------------------------------------------------------------------------------
 c
 c Gathering the parts
       D = (25.d0/4.d0)*(1.5d0*C_MR2 - 1.d0)**2.d0 + 1.d0
-      a = -(40.d0*spin**2.d0) / (K2*m**3.d0*D*C_MR2**2.d0)
-      b = (100.d0*spin**4.d0)/(K2**2.d0*m**6.d0*D**2.d0*C_MR2**4.d0)
-      c = (30.d0*spin**2.d0) / (PI*rho*K2*D*m**2.d0*C_MR2**2.d0)
+      a = -4.d0/m
+      b = (10.d0*spin**2.d0)/(K2*m**4.d0*D*C_MR2**2.d0)
+      c = 3.d0/(PI*rho)
       Delta0 = b**2.d0
       Delta1 = 2.d0*b**3.d0 + 27.d0*a**2.d0*c
 c
@@ -614,8 +617,7 @@ c Calculating R_eq, then find rate from angular momentum
       rate = spin/(C_MR2*m*eqR**2.d0)
 c
 c Now can calculate planetary J2 value
-      q = (rate**2.d0 * eqR**3.d0) / (K2*m)
-      J_2 = (1.d0/3.d0) * ((5.d0*q)/D - q)
+      J_2 = (rate**2.d0*eqR**3.d0)/(3.d0*K2*m) * (5.d0/D - 1.d0)
 c
 c Converting eqR to [km] and find spnP in [hr]
       eqR = eqR*AU/1.d5
@@ -1823,14 +1825,13 @@ c Local
 c
 c------------------------------------------------------------------------------
 c
-c-----------------------------------------------------------------------
       data elcode/ 'a','e','i','g','n','l','p','q','b','x','y','z',
-     %  'u','v','w','r','f','m','o','s','d','c','h','t','j','k','1','2',
+     %  'u','v','w','r','f','m','o','s','d','c','h','t','k','j','1','2',
      %  '3'/
       data elhead/ 'a   ','e   ','i   ','omga','Omga','M   ','pmga',
      %  'q   ','Q   ','x   ','y   ','z   ','vx  ','vy  ','vz  ','r   ',
-     %  'f   ','mass','obl ','spnP','dens','comp','is  ','ns  ',
-     %  'CMR2','eqR ','J2  ','love','tlag'/
+     %  'f   ','mass','obl ','spnP','dens','CMR2','spni','spnn',
+     %  'eqR ','J2  ','sx  ','sy  ','sz  '/
 c
 c Initialize header to a blank string
       do i = 1, 250
