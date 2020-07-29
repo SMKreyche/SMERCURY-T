@@ -3113,7 +3113,7 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,xh,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,xh,vh,angf,
      %    ngf)
 c
@@ -3141,7 +3141,7 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,xh,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,xh,vh,angf,
      %    ngf)
 c
@@ -3422,7 +3422,7 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,x,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
         do j = 2, nbod
@@ -3449,7 +3449,7 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,x,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
         do j = 2, nbod
@@ -4624,7 +4624,7 @@ c If accelerations from previous call are not valid, calculate them now
           a_GR(3,j) = 0.d0
         end do
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
       end if
 c
@@ -4708,7 +4708,7 @@ c
 c
 c Advance interaction Hamiltonian for H/2
       call mfo_hy (jcen,nbod,nbig,m,x,rcrit,a,stat)
-      if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c      if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
       if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
       do j = 2, nbod
@@ -4943,7 +4943,7 @@ c
           a_GR(3,j) = 0.d0
         end do
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c        if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
       end if
 c
@@ -4979,7 +4979,7 @@ c Check for close-encounter minima during drift step
 c
 c Advance interaction Hamiltonian for H/2
       call mfo_mvs (jcen,nbod,nbig,m,x,xj,a,stat)
-      if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
+c      if (opt(8).eq.1) call mfo_user (nbod,nbig,m,x,v,a_GR)
       if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
       do j = 2, nbod
@@ -5394,7 +5394,7 @@ c Input/Output
 c
 c Local
       integer j
-      real*8 acor(3,NMAX), a_GR(3,nbod),acen(3)
+      real*8 acor(3,NMAX),a_GR(3,nbod),acen(3),h
 c
 c------------------------------------------------------------------------------
 c
@@ -5431,19 +5431,10 @@ c Include radiation pressure/Poynting-Robertson drag if necessary
         end do
       end if
 c
-c Include post-Newtonian corrections if required
-      if (opt(7).eq.1) then
-        call mfo_pn (nbod,nbig,m,x,v,acor)
-        do j = 2, nbod
-          a(1,j) = a(1,j) + acor(1,j)
-          a(2,j) = a(2,j) + acor(2,j)
-          a(3,j) = a(3,j) + acor(3,j)
-        end do
-      end if
-c
 c Include user-defined accelerations if required
       if (opt(8).eq.1) then
-        call mfo_user (nbod,nbig,m,x,v,a_GR)
+        h = 1.d0
+        call mfo_user (nbod,nbig,h,m,x,v,a_GR)
         do j = 2, nbod
           a(1,j) = a(1,j) + a_GR(1,j)
           a(2,j) = a(2,j) + a_GR(2,j)
@@ -7337,7 +7328,9 @@ c Check if obliquity tide (time lag) routine is being used with wrong algorithm 
      %  (23,mem(81),lmem(81),mem(109),lmem(109),' ',1,mem(85),lmem(85))
 c
 c Check if user-defined force routine is being used with wrong algorithm
-      if (opt(8).eq.1.and.(algor.eq.11.or.algor.eq.12)) call mio_err
+      if (opt(8).eq.1.and.(algor.eq.1.or.algor.eq.2.or.algor.eq.3.or.
+     %                     algor.eq.4.or.algor.eq.10.or.algor.eq.11.or.
+     %                     algor.eq.12)) call mio_err
      %  (23,mem(81),lmem(81),mem(93),lmem(93),' ',1,mem(85),lmem(85))
 c
 c Check whether MVS is being used to integrate massive Small bodies,
