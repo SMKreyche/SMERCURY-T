@@ -1,9 +1,9 @@
-# Smercury-T
-A work in progress to equip the smercury orbital integrator with tidal and general relativisitic effects.
+# SMERCURY-T
+An upgrade of the SMERCURY orbital integrator that includes modules to enable tidal spin torques and general relativity.
 
-This work will modify the existing spin-tracking orbital integration algorithm, smercury, which is based in the original mercury package developed by Chambers (1999). The modifications include the addition of general relativistic forces, solar gravitational tidal effects on planetary obliquity and rotation rate, and other quality of life improvements. 
+This work modified the existing spin-tracking orbital integration algorithm, smercury, which is based in the original mercury package developed by Chambers (1999). The modifications include the addition of general relativistic forces, solar gravitational tidal effects on planetary obliquity and rotation rate, and other quality of life improvements. 
 
-Modifications so far:
+Modifications:
 
 - the param.in file now requires one of the following argument keywords to specify the spin-tracking algorithm: "spin", "Spin", "SPIN", "spn", or "SPN"
 
@@ -13,7 +13,7 @@ Modifications so far:
 
 - fixed spin rate and pomega output for ghost planet .aei files, and the spin node longitude now outputs from 0 to 360 degrees rather than -180 to 180
 
-- new param.in format along with message.in updates to include the options for phase lag or time lag obliquity tides for body 2 and the ghost planets
+- new param.in format along with message.in updates to include the options for time lag or phase lag (possible future implementation) tidal models for body 2 and the ghost planets
 
 - added a time lag obliquity tides subroutine obl_tides.for that is included within the spin subroutine to compute the tidal torques from the star at each time step, while a new subroutine mce_spin.for is included to update the planets' radii, J2 coefficients, and therefore moment of inertia components according to the reverse of the equations found in apppendix A of Lissauer et al. (2012), as their spin angular momentum evolves over time
 
