@@ -1,7 +1,9 @@
 # SMERCURY-T
 An upgrade of the SMERCURY orbital integrator that includes modules to enable tidal spin torques and general relativity.
 
-This work modified the existing spin-tracking orbital integration algorithm, smercury, which is based in the original mercury package developed by Chambers (1999). The modifications include the addition of general relativistic forces, solar gravitational tidal effects on planetary obliquity and rotation rate, and other quality of life improvements. 
+This work modified the existing spin-tracking orbital integration algorithm, smercury, which is based in the original mercury package developed by Chambers (1999). The modifications include the addition of general relativistic forces, solar gravitational tidal effects on planetary obliquity and rotation rate, along with other quality of life improvements. 
+
+See https://github.com/4xxi/mercury for more information on how to operate the parent code mercury.
 
 Modifications:
 
