@@ -1,5 +1,5 @@
 # SMERCURY-T
-https://zenodo.org/badge/235687253.svg
+[![DOI](https://zenodo.org/badge/235687253.svg)](https://zenodo.org/badge/latestdoi/235687253)
 
 An upgrade of the SMERCURY orbital integrator that includes modules to enable the solar tidal spin torque as well as the general relativistic force. In order to enable these modules for a SMERCURY-T simulation make sure that the param.in file specifies 'yes' for the obliquity tides (time lag model) and user-defined force (general relativity).
 
