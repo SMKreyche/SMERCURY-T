@@ -1,4 +1,6 @@
 # SMERCURY-T
+https://zenodo.org/badge/235687253.svg
+
 An upgrade of the SMERCURY orbital integrator that includes modules to enable the solar tidal spin torque as well as the general relativistic force. In order to enable these modules for a SMERCURY-T simulation make sure that the param.in file specifies 'yes' for the obliquity tides (time lag model) and user-defined force (general relativity).
 
 This work modified the existing spin-tracking orbital integration algorithm, smercury, which is based in the original mercury package developed by Chambers (1999). This algorithm follows Wisdom and Touma (1994), while additional details can be found in Lissauer et al. (2012) and Barnes et al. (2016). The smercury algorithm primarily differs from the base package by treating the first listed body in the 'big.in' file as a spin-tracked rigid rotator, while the central body and other planets are point masses. The bodies listed in the 'small.in' file are deemed 'ghost planets', and are massless copies of the spin-tracked 'big.in' body that copy the same orbital evolution but their spin evolution is computed independently. This algorithm includes the effects of torques from the Sun and other planets on the spin-tracked planet's equatorial bulge, as well as the resulting forces exerted back on those bodies which affects their orbits.
