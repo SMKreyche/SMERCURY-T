@@ -129,6 +129,7 @@ c
       real*8 C_MR2(NMAX),k_2p(NMAX),t_lag(NMAX),ttol
       real*8 rceh(NMAX),epoch(NMAX),ngf(4,NMAX),rmax,rcen,jcen(3)
       real*8 cefac,time,tstart,tstop,dtout,h0,tol,en(3),am(3)
+      real*8 tcount(3,NMAX)
       character*8 id(NMAX)
       character*80 outfile(3), dumpfile(4), mem(NMESS)
       external mdt_mvs, mdt_bs1, mdt_bs2, mdt_ra15, mdt_hy, mdt_spin
@@ -163,32 +164,32 @@ c Main integration
       if (algor.eq.1) call mal_hcon (time,tstart,tstop,dtout,algor,h0,
      %  tol,jcen,rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,
      %  rho,rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,
-     %  lmem,mdt_mvs,mco_h2mvs,mco_mvs2h,C_MR2,k_2p,t_lag,ttol)
+     %  lmem,mdt_mvs,mco_h2mvs,mco_mvs2h,C_MR2,k_2p,t_lag,ttol,tcount)
 c
       if (algor.eq.2) call mal_hvar (time,tstart,tstop,dtout,algor,h0,
      %  tol,jcen,rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,
      %  rho,rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,
-     %  lmem,mdt_bs1,C_MR2,k_2p,t_lag,ttol)
+     %  lmem,mdt_bs1,C_MR2,k_2p,t_lag,ttol,tcount)
 c
       if (algor.eq.3) call mal_hvar (time,tstart,tstop,dtout,algor,h0,
      %  tol,jcen,rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,
      %  rho,rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,
-     %  lmem,mdt_bs2,C_MR2,k_2p,t_lag,ttol)
+     %  lmem,mdt_bs2,C_MR2,k_2p,t_lag,ttol,tcount)
 c
       if (algor.eq.4) call mal_hvar (time,tstart,tstop,dtout,algor,h0,
      %  tol,jcen,rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,
      %  rho,rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,
-     %  lmem,mdt_ra15,C_MR2,k_2p,t_lag,ttol)
+     %  lmem,mdt_ra15,C_MR2,k_2p,t_lag,ttol,tcount)
 c
       if (algor.eq.9) call mal_hcon (time,tstart,tstop,dtout,algor,h0,
      %  tol,jcen,rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,
      %  rho,rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,
-     %  lmem,mdt_spin,mco_h2dh,mco_dh2h,C_MR2,k_2p,t_lag,ttol)
+     %  lmem,mdt_spin,mco_h2dh,mco_dh2h,C_MR2,k_2p,t_lag,ttol,tcount)
 c     
       if (algor.eq.10) call mal_hcon (time,tstart,tstop,dtout,algor,h0,
      %  tol,jcen,rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,
      %  rho,rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,
-     %  lmem,mdt_hy,mco_h2dh,mco_dh2h,C_MR2,k_2p,t_lag,ttol)
+     %  lmem,mdt_hy,mco_h2dh,mco_dh2h,C_MR2,k_2p,t_lag,ttol,tcount)
 c
 c Do a final data dump
       do j = 2, nbod
@@ -243,7 +244,7 @@ c
       subroutine mdt_spin (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
      %  nbig,m,x,v,s,rphys,rcrit,rce,stat,id,ngf,algor,opt,dtflag,
      %  ngflag,opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,
-     %  outfile,mem,lmem,C_MR2,rho,k_2p,t_lag,ttol)
+     %  outfile,mem,lmem,C_MR2,rho,k_2p,t_lag,ttol,tcount)
 c
       implicit none
       include 'mercury.inc'
@@ -255,21 +256,22 @@ c Input/Output
       real*8 m(nbod),x(3,nbod),v(3,nbod),s(3,nbod),rphys(nbod)
       real*8 rce(nbod),rcrit(nbod),ngf(4,nbod),tclo(CMAX),dclo(CMAX)
       real*8 ixvclo(6,CMAX),jxvclo(6,CMAX),C_MR2(nbod),rho(nbod)
-      real*8 k_2p(nbod),t_lag(nbod),ttol
+      real*8 k_2p(nbod),t_lag(nbod),ttol,tcount(3,nbod)
       character*80 outfile(3),mem(NMESS)
       character*8 id(nbod)
 c
 c Local
-      integer j,nce,ice(NMAX),jce(NMAX),ce(NMAX),iflag,i,tflag(NMAX)
+      integer j,nce,ice(NMAX),jce(NMAX),ce(NMAX),iflag,i,tflag(3,NMAX)
+      integer check
       real*8 a(3,NMAX),hby2,x0(3,NMAX),v0(3,NMAX),mvsum(3),temp
       real*8 as(3,NMAX),bigs(3,NMAX),smag,c(3,3,NMAX)
-      real*8 eqR(NMAX),moi(3,NMAX),N_t(3,NMAX),vxh,vyh,vzh,vh(3,NMAX)
-      real*8 vh_GR(3,NMAX),mtot,v_GR(3,NMAX),N_sum(3,NMAX),Nmag
+      real*8 eqR(NMAX),moi(3,NMAX),N_t(3,NMAX),N_sum(3,NMAX)
+      real*8 xh(3,NMAX),vh(3,NMAX),vh_GR(3,NMAX),v_GR(3,NMAX)
       external mfo_hkce
 c
 c------------------------------------------------------------------------------
 c
-      save a, as, c, bigs, eqR, moi, tflag, N_sum
+      save a,as,c,bigs,eqR,moi,tflag,N_sum,v_GR
 c
       hby2 = h0 * 0.5d0
       nclo = 0
@@ -284,13 +286,25 @@ c obliquity tides flag parameter -- SMK
               goto 90
             end if
           end if
-c
           x(1,i) = x(1,2)
           x(2,i) = x(2,2)
           x(3,i) = x(3,2)
 c
-          tflag(i) = 1
+          tflag(1,i) = 1
+          tflag(2,i) = 1
+          tflag(3,i) = 1
+c
+          tcount(1,i) = 0.d0
+          tcount(2,i) = 0.d0
+          tcount(3,i) = 0.d0
+c
 90      end do
+c
+        do j = 2, nbig
+          v_GR(1,j) = 0.d0
+          v_GR(2,j) = 0.d0
+          v_GR(3,j) = 0.d0
+        end do
       end if
 c
 c      WRITE (*,*)
@@ -302,6 +316,7 @@ c
 c If first ever call to subroutine, or if using obliquity tides (time lag), 
 c set up the C matrix, and calculate moi components and planet radii -- SMK
       if (dtflag.eq.0.or.opt(7).eq.1) then
+        check = 0
         do i = 2, nbod
           if (i.le.nbig) then
             if (i.ne.2) then
@@ -310,25 +325,42 @@ c set up the C matrix, and calculate moi components and planet radii -- SMK
           end if
 c
 c Do calculations if tidal flag parameter requires them -- SMK
-          if (tflag(i).eq.1) then
-				    smag = sqrt(s(1,i)*s(1,i) + s(2,i)*s(2,i) + s(3,i)*s(3,i))
-        	  temp = sqrt(s(2,i)*s(2,i) + s(3,i)*s(3,i))
-      		  c(1,1,i) =  temp / smag
-        	  c(1,2,i) =  0.d0
-        	  c(1,3,i) =  s(1,i) / smag
-        	  c(2,1,i) = -s(1,i) * s(2,i) / (smag * temp)
-        	  c(2,2,i) =  s(3,i) / temp
-        	  c(2,3,i) =  s(2,i) / smag
-        	  c(3,1,i) = -s(1,i) * s(3,i) / (smag * temp)
-        	  c(3,2,i) = -s(2,i) / temp
-        	  c(3,3,i) =  s(3,i) / smag
+        if (tflag(1,i).eq.1.or.tflag(2,i).eq.1.or.tflag(3,i).eq.1) then
+          check = 1
+          smag = sqrt(s(1,i)*s(1,i) + s(2,i)*s(2,i) + s(3,i)*s(3,i))
+          temp = sqrt(s(2,i)*s(2,i) + s(3,i)*s(3,i))
+          c(1,1,i) =  temp / smag
+          c(1,2,i) =  0.d0
+          c(1,3,i) =  s(1,i) / smag
+          c(2,1,i) = -s(1,i) * s(2,i) / (smag * temp)
+          c(2,2,i) =  s(3,i) / temp
+          c(2,3,i) =  s(2,i) / smag
+          c(3,1,i) = -s(1,i) * s(3,i) / (smag * temp)
+          c(3,2,i) = -s(2,i) / temp
+          c(3,3,i) =  s(3,i) / smag
 c
 c Also calculate moi components and radii for body 2 and smalls -- SMK
-            call mce_spin(m(2),smag/K2,C_MR2(i),rho(2),eqR(i),moi(1,i),
-     %                    moi(2,i),moi(3,i))
+          call mce_spin(m(2),smag/K2,C_MR2(i),rho(2),eqR(i),moi(1,i),
+     %                  moi(2,i),moi(3,i))
+c
+c If using obliquity tides (time lag) calculate body spins if necessary -- SMK
+          if (opt(7).eq.1.and.dtflag.eq.2) then
+c
+c Convert spins to body frame using S = C^-1 * s
+            bigs(1,i) = c(1,1,i)*s(1,i)+c(2,1,i)*s(2,i)+c(3,1,i)*s(3,i)
+            bigs(2,i) = c(1,2,i)*s(1,i)+c(2,2,i)*s(2,i)+c(3,2,i)*s(3,i)
+            bigs(3,i) = c(1,3,i)*s(1,i)+c(2,3,i)*s(2,i)+c(3,3,i)*s(3,i)
+c
           end if
+        end if
 91      end do
-      end if
+c
+c If using obliquity tides (time lag) calculate accelerations if tidal torque was added in previous time step -- SMK
+        if (opt(7).eq.1.and.dtflag.eq.2.and.check.eq.1) then
+          call mfo_spinorb (jcen,nbod,nbig,m,x,rcrit,a,as,stat,c,moi)
+        end if
+c
+      end if      
 c
 c        WRITE (*,*) 'C matrix at time=',time/365.25d0
 c        WRITE (*,111) c(1,1),c(1,2),c(1,3)
@@ -336,9 +368,8 @@ c        WRITE (*,111) c(2,1),c(2,2),c(2,3)
 c        WRITE (*,111) c(3,1),c(3,2),c(3,3)
 c 111    FORMAT (' (',f9.6,1x,f9.6,1x,f9.6,')')
 c
-c If accelerations from previous call are not valid, or if using obliquity
-c tides (time lag) calculate them now -- SMK
-      if (dtflag.ne.2.or.opt(7).eq.1) then
+c If accelerations from previous call are not valid, calculate them now
+      if (dtflag.ne.2) then
 c
 c Convert spins to body frame using S = C^-1 * s
         do j = 2, nbod			
@@ -347,13 +378,9 @@ c Convert spins to body frame using S = C^-1 * s
               goto 92
             end if
           end if
-c
-c Check if tidal flag parameter requires calculations
-          if (tflag(j).eq.1) then
-            bigs(1,j) = c(1,1,j)*s(1,j)+c(2,1,j)*s(2,j)+c(3,1,j)*s(3,j)
-            bigs(2,j) = c(1,2,j)*s(1,j)+c(2,2,j)*s(2,j)+c(3,2,j)*s(3,j)
-            bigs(3,j) = c(1,3,j)*s(1,j)+c(2,3,j)*s(2,j)+c(3,3,j)*s(3,j)
-          end if
+          bigs(1,j) = c(1,1,j)*s(1,j)+c(2,1,j)*s(2,j)+c(3,1,j)*s(3,j)
+          bigs(2,j) = c(1,2,j)*s(1,j)+c(2,2,j)*s(2,j)+c(3,2,j)*s(3,j)
+          bigs(3,j) = c(1,3,j)*s(1,j)+c(2,3,j)*s(2,j)+c(3,3,j)*s(3,j)
 92      end do
 c
 c        if (dtflag.eq.0) hrec = h0
@@ -362,74 +389,38 @@ c		  write (*,*) ' x[1,10] = ', x(1,10), ' x[2,10] = ', x(2,10)
 c		  write (*,*) ' x[1,2]  = ', x(1,2), ' x[2,2]  = ', x(2,2) 
 		  
         call mfo_spinorb (jcen,nbod,nbig,m,x,rcrit,a,as,stat,c,moi)
-c		  write (*,*) ' x[1,10] = ', x(1,10), ' x[2,10] = ', x(2,10) 
+c		  write (*,*) ' x[1,10] = ', x(1,10), ' x[2,10] = ', x(2,10)
+c
+c If required, compute general relativistic accelerations -- SMK
+        if (opt(8).eq.1) then
+c Converting to heliocentric (central) coordinates for this part
+          call mco_dh2h (time,jcen,nbig,nbig,h0,m,x,v,xh,vh,ngf,
+     %                     ngflag,opt)
+c
+c Calculate relativistic accelerations
+          call mfo_user (nbod,nbig,hby2,m,xh,vh,vh_GR)
+c
+c Convert velocities back to democratic heliocentric coordinates
+          call mco_h2dh (time,jcen,nbig,nbig,h0,m,xh,vh_GR,x,v_GR,ngf,
+     %                     ngflag,opt)
+        end if
+c
         dtflag = 2
       end if
 c
 c Advance interaction Hamiltonian for H/2
-      do j = 2, nbig
-        v_GR(1,j) = 0.d0
-        v_GR(2,j) = 0.d0
-        v_GR(3,j) = 0.d0
-      end do
-
-c If required, compute general relativistic accelerations -- SMK
-      if (opt(8).eq.1) then
-c
-c Converting to heliocentric (central) coordinates for this part
-        mvsum(1) = 0.d0
-        mvsum(2) = 0.d0
-        mvsum(3) = 0.d0
-c
-        do j = 2, nbig
-          mvsum(1) = mvsum(1) + m(j)*v(1,j)
-          mvsum(2) = mvsum(2) + m(j)*v(2,j)
-          mvsum(3) = mvsum(3) + m(j)*v(3,j)
-        end do
-c
-        do j = 2, nbig
-          vh(1,j) = v(1,j) + mvsum(1)/m(1)
-          vh(2,j) = v(2,j) + mvsum(2)/m(1)
-          vh(3,j) = v(3,j) + mvsum(3)/m(1)
-        end do
-c
-c Calculate relativistic accelerations
-        call mfo_user (nbod,nbig,hby2,m,x,vh,vh_GR)
-c
-c Convert velocities back to democratic heliocentric coordinates
-        mtot = 0.d0
-        mvsum(1) = 0.d0
-        mvsum(2) = 0.d0
-        mvsum(3) = 0.d0
-c
-        do j = 2, nbig
-          mtot = mtot + m(j)
-          mvsum(1) = mvsum(1) + m(j)*vh_GR(1,j)
-          mvsum(2) = mvsum(2) + m(j)*vh_GR(2,j)
-          mvsum(3) = mvsum(3) + m(j)*vh_GR(3,j)
-        end do
-c
-        temp = m(1) + mtot
-c
-        do j = 2, nbig
-          v_GR(1,j) = vh_GR(1,j) - mvsum(1)/temp
-          v_GR(2,j) = vh_GR(2,j) - mvsum(2)/temp
-          v_GR(3,j) = vh_GR(3,j) - mvsum(3)/temp
-        end do
-      end if
-c
       do j = 2, nbig
         v(1,j) = v(1,j) + hby2 * a(1,j) + v_GR(1,j)
         v(2,j) = v(2,j) + hby2 * a(2,j) + v_GR(2,j)
         v(3,j) = v(3,j) + hby2 * a(3,j) + v_GR(3,j)
       end do
 		  
-		  do j = 2, nbod
-			  if (j.le.nbig) then
-				  if (j.ne.2) then
-					  goto 93
-				  endif
-			  endif
+      do j = 2, nbod
+        if (j.le.nbig) then
+          if (j.ne.2) then
+            goto 93
+          endif
+        endif
 c
         bigs(1,j) = bigs(1,j)  +  hby2 * as(1,j)
         bigs(2,j) = bigs(2,j)  +  hby2 * as(2,j)
@@ -538,56 +529,21 @@ c	set ghost planets to planet 2 location
         x(2,j) = x(2,2)
         x(3,j) = x(3,2)
 	     end do
-
-      do j = 2, nbig
-        v_GR(1,j) = 0.d0
-        v_GR(2,j) = 0.d0
-        v_GR(3,j) = 0.d0
-      end do
-      
+c      
 c If required, compute general relativistic accelerations -- SMK
       if (opt(8).eq.1) then
 c
 c Converting to heliocentric (central) coordinates for this part
-        mvsum(1) = 0.d0
-        mvsum(2) = 0.d0
-        mvsum(3) = 0.d0
-c
-        do j = 2, nbig
-          mvsum(1) = mvsum(1) + m(j)*v(1,j)
-          mvsum(2) = mvsum(2) + m(j)*v(2,j)
-          mvsum(3) = mvsum(3) + m(j)*v(3,j)
-        end do
-c
-        do j = 2, nbig
-          vh(1,j) = v(1,j) + mvsum(1)/m(1)
-          vh(2,j) = v(2,j) + mvsum(2)/m(1)
-          vh(3,j) = v(3,j) + mvsum(3)/m(1)
-        end do
+        call mco_dh2h (time,jcen,nbig,nbig,h0,m,x,v,xh,vh,ngf,
+     %                 ngflag,opt)
 c
 c Calculate relativistic accelerations
-        call mfo_user (nbod,nbig,hby2,m,x,vh,vh_GR)
+        call mfo_user (nbod,nbig,hby2,m,xh,vh,vh_GR)
 c
 c Convert velocities back to democratic heliocentric coordinates
-        mtot = 0.d0
-        mvsum(1) = 0.d0
-        mvsum(2) = 0.d0
-        mvsum(3) = 0.d0
+        call mco_h2dh (time,jcen,nbig,nbig,h0,m,xh,vh_GR,x,v_GR,ngf,
+     %                 ngflag,opt)
 c
-        do j = 2, nbig
-          mtot = mtot + m(j)
-          mvsum(1) = mvsum(1) + m(j)*vh_GR(1,j)
-          mvsum(2) = mvsum(2) + m(j)*vh_GR(2,j)
-          mvsum(3) = mvsum(3) + m(j)*vh_GR(3,j)
-        end do
-c
-        temp = m(1) + mtot
-c
-        do j = 2, nbig
-          v_GR(1,j) = vh_GR(1,j) - mvsum(1)/temp
-          v_GR(2,j) = vh_GR(2,j) - mvsum(2)/temp
-          v_GR(3,j) = vh_GR(3,j) - mvsum(3)/temp
-        end do
       end if
 c
       do j = 2, nbig
@@ -595,14 +551,14 @@ c
         v(2,j) = v(2,j) + hby2 * a(2,j) + v_GR(2,j)
         v(3,j) = v(3,j) + hby2 * a(3,j) + v_GR(3,j)
       end do
-		
-	    do j = 2, nbod
+c		
+      do j = 2, nbod
         if (j.le.nbig) then
-			    if (j.ne.2) then
-			      goto 94
-			    endif
-			  endif
-			
+            if (j.ne.2) then
+                goto 94
+            endif
+        endif
+c			  
         bigs(1,j) = bigs(1,j)  +  hby2 * as(1,j)
         bigs(2,j) = bigs(2,j)  +  hby2 * as(2,j)
         bigs(3,j) = bigs(3,j)  +  hby2 * as(3,j)
@@ -657,23 +613,12 @@ c and smalls -- SMK
 c
 c Converting to heliocentric (central) coordinates for this calculation 
 c (only need body 2 coords)
-        mvsum(1) = 0.d0
-        mvsum(2) = 0.d0
-        mvsum(3) = 0.d0
-c
-        do j = 2, nbig
-          mvsum(1) = mvsum(1) + m(j)*v(1,j)
-          mvsum(2) = mvsum(2) + m(j)*v(2,j)
-          mvsum(3) = mvsum(3) + m(j)*v(3,j)
-        end do
-c
-        vxh = v(1,2) + mvsum(1)/m(1)
-        vyh = v(2,2) + mvsum(2)/m(1)
-        vzh = v(3,2) + mvsum(3)/m(1)
+        call mco_dh2h (time,jcen,2,nbig,h0,m,x,v,xh,vh,ngf,
+     %                 ngflag,opt)
 c
 c Computing tidal obliquity torque components
-        call obl_tides(nbod,nbig,m,x(1,2),x(2,2),x(3,2),vxh,vyh,vzh,s,
-     %                 C_MR2,eqR,k_2p,t_lag,N_t)
+        call obl_tides(nbod,nbig,m,xh(1,2),xh(2,2),xh(3,2),vh(1,2),
+     %                 vh(2,2),vh(3,2),s,C_MR2,eqR,k_2p,t_lag,N_t,h0)
 c
 c If necessary add torque contributions to spin vectors of body 2 and smalls
         do j = 2, nbod
@@ -684,11 +629,9 @@ c If necessary add torque contributions to spin vectors of body 2 and smalls
           end if
 c
 c If flagged, zero out torque sums
-          if (tflag(j).eq.1) then
-            N_sum(1,j) = 0.d0
-            N_sum(2,j) = 0.d0
-            N_sum(3,j) = 0.d0
-          end if
+          if (tflag(1,j).eq.1) N_sum(1,j) = 0.d0
+          if (tflag(2,j).eq.1) N_sum(2,j) = 0.d0
+          if (tflag(3,j).eq.1) N_sum(3,j) = 0.d0
 c
 c Add torques to torque sums
           N_sum(1,j) = N_sum(1,j) + N_t(1,j)
@@ -696,17 +639,28 @@ c Add torques to torque sums
           N_sum(3,j) = N_sum(3,j) + N_t(3,j)
 c
 c Add torque sums to spin vectors if magnitude exceeds tidal tolerance threshold
-          smag = sqrt(s(1,j)*s(1,j) + s(2,j)*s(2,j) + s(3,j)*s(3,j))
-          Nmag = sqrt( h0*N_sum(1,j) * h0*N_sum(1,j) + 
-     %                 h0*N_sum(2,j) * h0*N_sum(2,j) + 
-     %                 h0*N_sum(3,j) * h0*N_sum(3,j) )
-          if (Nmag.ge.(smag*ttol)) then
-            s(1,j) = s(1,j) + h0*N_sum(1,j)
-            s(2,j) = s(2,j) + h0*N_sum(2,j)
-            s(3,j) = s(3,j) + h0*N_sum(3,j)
-            tflag(j) = 1
-          else
-            tflag(j) = 0
+          if (abs(N_sum(1,j)).ge.abs(s(1,j)*ttol)) then
+            s(1,j) = s(1,j) + N_sum(1,j)
+            tflag(1,j) = 1
+            tcount(1,j) = tcount(1,j) + 1.d0
+          else 
+            tflag(1,j) = 0
+          end if
+c
+          if (abs(N_sum(2,j)).ge.abs(s(2,j)*ttol)) then
+            s(2,j) = s(2,j) + N_sum(2,j)
+            tflag(2,j) = 1
+            tcount(2,j) = tcount(2,j) + 1.d0
+          else 
+            tflag(2,j) = 0
+          end if
+c
+          if (abs(N_sum(3,j)).ge.abs(s(3,j)*ttol)) then
+            s(3,j) = s(3,j) + N_sum(3,j)
+            tflag(3,j) = 1
+            tcount(3,j) = tcount(3,j) + 1.d0
+          else 
+            tflag(3,j) = 0
           end if
 c
 96      end do
@@ -775,7 +729,7 @@ c        spin-track only for body 2 & smalls
          as(3,i) = 0.d0
 			
 c	write (*,*) 'calculating central body torques for i=',i,'/',nbod
-      bigx(1) = c(1,1,i)*x(1,2) + c(2,1,i)*x(2,2) + c(3,1,i)*x(3,2)
+        bigx(1) = c(1,1,i)*x(1,2) + c(2,1,i)*x(2,2) + c(3,1,i)*x(3,2)
     	bigx(2) = c(1,2,i)*x(1,2) + c(2,2,i)*x(2,2) + c(3,2,i)*x(3,2)
     	bigx(3) = c(1,3,i)*x(1,2) + c(2,3,i)*x(2,2) + c(3,3,i)*x(3,2)
     	bigr_2(i) = 1.d0 / 
@@ -1111,7 +1065,7 @@ c
 c------------------------------------------------------------------------------
 c
       subroutine obl_tides (nbod,nbig,m,xx,xy,xz,vx,vy,vz,s,C_MR2,R_p,
-     %                      k_2p,t_lag,N_t)
+     %                      k_2p,t_lag,N_t,h0)
 c
 c nbod = total number of bodies (big and small) [unitless]
 c nbig = number of big bodies [unitless]
@@ -1135,20 +1089,18 @@ c
 c Input/Output
       integer nbod,nbig
       real*8 m(nbod),xx,xy,xz,vx,vy,vz,s(3,nbod),R_p(nbod),k_2p(nbod)
-      real*8 t_lag(nbod),N_t(3,nbod),C_MR2(nbod)
+      real*8 t_lag(nbod),N_t(3,nbod),C_MR2(nbod),h0
 c
 c Local
       integer j
-      real*8 r_mag,r_mag7,r_mag_fac,r_dot_s,P_to,m_factor,I_p_fac,sx,sy
-      real*8 sz,R_p2
+      real*8 r_mag,r_dot_omega,P_to,m_factor,I_p,omegax,omegay,omegaz
+      real*8 R_p2
 c
 c------------------------------------------------------------------------------
 c
 c Gathering some unverisal parts
         r_mag = sqrt(xx*xx + xy*xy + xz*xz)
-        r_mag7 = r_mag**7.d0
-        r_mag_fac = 1.d0 / r_mag
-        m_factor= -m(1) / (m(1) + m(2))
+        m_factor= -(K2 * h0 * m(1)) / (m(1) + m(2))
 c
 c Perform for body 2 and small bodies (ghost planets)
       do j = 2, nbod
@@ -1159,27 +1111,27 @@ c Perform for body 2 and small bodies (ghost planets)
         end if
 c
 c Gathering some additional parts
-        sx = s(1,j) / K2
-        sy = s(2,j) / K2
-        sz = s(3,j) / K2
         R_p2 = R_p(j)*R_p(j)
-        r_dot_s = xx*sx + xy*sy + xz*sz
-        P_to = (3.d0*m(1)**2.d0/K2*R_p2*R_p2*R_p(j)*k_2p(j)*t_lag(j)) / 
-     %         r_mag7
-        I_p_fac = 1.d0 / (C_MR2(j)*m(2)/K2*R_p2)
+        I_p = C_MR2(j)*m(2)/K2*R_p2
+        omegax = s(1,j) / K2 / I_p
+        omegay = s(2,j) / K2 / I_p
+        omegaz = s(3,j) / K2 / I_p
+        r_dot_omega = xx*omegax + xy*omegay + xz*omegaz
+        P_to = (3.d0*m(1)*m(1)*R_p2*R_p2*R_p(j)*k_2p(j)*t_lag(j)) / 
+     %         (K2*r_mag**7.d0)
 c
 c Computing the torque components
-        N_t(1,j) = P_to * ( I_p_fac * (r_mag*sx - r_dot_s*xx/r_mag) - 
-     %             r_mag_fac*(xy*vz - xz*vy) )
-        N_t(2,j) = P_to * ( I_p_fac * (r_mag*sy - r_dot_s*xy/r_mag) -
-     %             r_mag_fac*(xz*vx - xx*vz) )   
-        N_t(3,j) = P_to * ( I_p_fac * (r_mag*sz - r_dot_s*xz/r_mag) -
-     %             r_mag_fac*(xx*vy - xy*vx) ) 
+        N_t(1,j) = P_to * (r_mag*omegax - r_dot_omega*xx/r_mag - 
+     %             (xy*vz - xz*vy)/r_mag )
+        N_t(2,j) = P_to * (r_mag*omegay - r_dot_omega*xy/r_mag -
+     %             (xz*vx - xx*vz)/r_mag )   
+        N_t(3,j) = P_to * (r_mag*omegaz - r_dot_omega*xz/r_mag -
+     %             (xx*vy - xy*vx)/r_mag ) 
 c
 c Final values adjusted for heliocentric coordinates and multiply by K2
-        N_t(1,j) = m_factor * N_t(1,j) * K2
-        N_t(2,j) = m_factor * N_t(2,j) * K2
-        N_t(3,j) = m_factor * N_t(3,j) * K2
+        N_t(1,j) = m_factor * N_t(1,j)
+        N_t(2,j) = m_factor * N_t(2,j)
+        N_t(3,j) = m_factor * N_t(3,j)
 c        
 10    end do
 c
@@ -1381,7 +1333,7 @@ c
       subroutine mal_hvar (time,tstart,tstop,dtout,algor,h0,tol,jcen,
      %  rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,rho,rceh,
      %  stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,lmem,onestep,
-     %  C_MR2,k_2p,t_lag,ttol)
+     %  C_MR2,k_2p,t_lag,ttol,tcount)
 c
       implicit none
       include 'mercury.inc'
@@ -1392,7 +1344,7 @@ c Input/Output
       real*8 time,tstart,tstop,dtout,h0,tol,jcen(3),rcen,rmax
       real*8 en(3),am(3),cefac,m(nbod),xh(3,nbod),vh(3,nbod)
       real*8 s(3,nbod),rho(nbod),rceh(nbod),ngf(4,nbod)
-		  real*8 C_MR2(nbod),k_2p(nbod),t_lag(nbod),ttol
+      real*8 C_MR2(nbod),k_2p(nbod),t_lag(nbod),ttol,tcount(3,nbod)
       character*8 id(nbod)
       character*80 outfile(3),dumpfile(4),mem(NMESS)
 c
@@ -1451,7 +1403,7 @@ c Beware: the integration may change direction at this point!!!!
 c
 c Output data for all bodies
         call mio_out (time,jcen,rcen,rmax,nbod,nbig,m,xh,vh,s,rho,
-     %    stat,id,opt,opflag,algor,outfile(1),C_MR2)
+     %    stat,id,opt,opflag,algor,outfile(1),C_MR2,tcount)
         call mio_ce (time,tstart,rcen,rmax,nbod,nbig,m,stat,id,
      %    0,iclo,jclo,opt,stopflag,tclo,dclo,ixvclo,jxvclo,mem,lmem,
      %    outfile,nstored,0)
@@ -1638,7 +1590,7 @@ c
       subroutine mal_hcon (time,tstart,tstop,dtout,algor,h0,tol,jcen,
      %  rcen,rmax,en,am,cefac,ndump,nfun,nbod,nbig,m,xh,vh,s,rho,
      %  rceh,stat,id,ngf,opt,opflag,ngflag,outfile,dumpfile,mem,lmem,
-     %  onestep,coord,bcoord,C_MR2,k_2p,t_lag,ttol)
+     %  onestep,coord,bcoord,C_MR2,k_2p,t_lag,ttol,tcount)
 c
       implicit none
       include 'mercury.inc'
@@ -1650,7 +1602,7 @@ c Input/Output
       real*8 en(3),am(3),cefac,m(nbod),xh(3,nbod),vh(3,nbod)
       real*8 s(3,nbod),rho(nbod),rceh(nbod),ngf(4,nbod)
       real*8 C_MR2(nbod),k_2p(nbod),t_lag(nbod),ttol
-      real*8 obl_max(nbod),obl_min(nbod)
+      real*8 obl_max(nbod),obl_min(nbod),tcount(3,nbod)
       character*8 id(nbod)
       character*80 outfile(3),dumpfile(4),mem(NMESS)
 c
@@ -1711,7 +1663,7 @@ c
 c Convert to heliocentric coordinates and output data for all bodies
         call bcoord (time,jcen,nbod,nbig,h0,m,x,v,xh,vh,ngf,ngflag,opt)
         call mio_out (time,jcen,rcen,rmax,nbod,nbig,m,xh,vh,s,rho,
-     %    stat,id,opt,opflag,algor,outfile(1),C_MR2)
+     %    stat,id,opt,opflag,algor,outfile(1),C_MR2,tcount)
         call mio_ce (time,tstart,rcen,rmax,nbod,nbig,m,stat,id,
      %    0,iclo,jclo,opt,stopflag,tclo,dclo,ixvclo,jxvclo,mem,lmem,
      %    outfile,nstored,0)
@@ -1753,7 +1705,7 @@ c (JWB) execute timestep
       call onestep (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,nbig,
      %  m,x,v,s,rphys,rcrit,rce,stat,id,ngf,algor,opt,dtflag,ngflag,
      %  opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,outfile,
-     %  mem,lmem,C_MR2,rho,k_2p,t_lag,ttol)
+     %  mem,lmem,C_MR2,rho,k_2p,t_lag,ttol,tcount)
       time = time + h0
 c Modification for Spin version of Mercury: ie spin will change every step
       if (opflag.ge.0) opflag = 1
@@ -7574,7 +7526,7 @@ c
 c------------------------------------------------------------------------------
 c
       subroutine mio_out (time,jcen,rcen,rmax,nbod,nbig,m,xh,vh,s,rho,
-     %  stat,id,opt,opflag,algor,outfile,C_MR2)
+     %  stat,id,opt,opflag,algor,outfile,C_MR2,tcount)
 c
       implicit none
       include 'mercury.inc'
@@ -7583,13 +7535,15 @@ c Input/Output
       integer nbod, nbig, stat(nbod), opt(8), opflag, algor
       real*8 time,jcen(3),rcen,rmax,m(nbod),xh(3,nbod),vh(3,nbod)
       real*8 s(3,nbod),rho(nbod),C_MR2(nbod),k_2p(nbod),t_lag(nbod)
+      real*8 tcount(3,nbod)
       character*80 outfile
       character*8 id(nbod)
 c
 c Local
       integer k, len, nchar
       real*8 rhocgs,k_2,rfac,rcen_2,fr,fv,theta,phi,vtheta,vphi
-      character*80 header,c(NMAX)
+      character*80 header
+      character*100 c(NMAX)
       character*8 mio_fl2c,mio_re2c
       character*5 fout
 c
@@ -7645,13 +7599,16 @@ c added C_MR2 for element6 computation and output -- SMK
           c(k)(36:43) = mio_fl2c (s(3,k) * k_2)
           c(k)(44:51) = mio_fl2c (rho(k) / rhocgs)
           c(k)(52:59) = mio_fl2c (C_MR2(k))
+          c(k)(60:67) = mio_fl2c (tcount(1,k))
+          c(k)(68:75) = mio_fl2c (tcount(2,k))
+          c(k)(76:83) = mio_fl2c (tcount(3,k))
         end do
 c
 c Write compressed output to file
         write (21,'(a1,a2,i2,a62,i1)') char(12),'6a',algor,header(1:62),
      %    opt(4)
         do k = 2, nbod
-          write (21,'(a59)') c(k)(1:59)
+          write (21,'(a83)') c(k)(1:83)
         end do
       end if
 c

@@ -22,15 +22,16 @@ c
       integer itmp,i,j,k,l,iback(NMAX),precision,lenin
       integer nmaster,nopen,nwait,nbig,nsml,nbod,nsub,lim(2,100)
       integer year,month,timestyle,line_num,lenhead,lmem(NMESS)
-      integer nchar,algor,centre,allflag,firstflag,ninfile,nel,iel(29)
+      integer nchar,algor,centre,allflag,firstflag,ninfile,nel,iel(32)
       integer nbod1,nbig1,unit(NMAX),code(NMAX),master_unit(NMAX)
       real*8 time,teval,t0,t1,tprevious,rmax,rcen,rfac,rhocgs,temp
-      real*8 mcen,jcen(3),el(29,NMAX),s(3),is(NMAX),ns(NMAX),a(NMAX)
+      real*8 mcen,jcen(3),el(32,NMAX),s(3),is(NMAX),ns(NMAX),a(NMAX)
       real*8 mio_c2re, mio_c2fl,fr,theta,phi,fv,vtheta,vphi,gm
       real*8 x(3,NMAX),v(3,NMAX),xh(3,NMAX),vh(3,NMAX),m(NMAX)
       logical test
       character*250 string,fout,header,infile(50)
-      character*80 mem(NMESS),cc,c(NMAX)
+      character*80 mem(NMESS),cc
+      character*100 c(NMAX)
       character*8 master_id(NMAX),id(NMAX)
       character*5 fin
       character*1 check,style,type,c1
@@ -192,7 +193,7 @@ c
 c Read in strings containing compressed data for each object
           do j = 1, nbig + nsml
             line_num = line_num + 1
-            read (10,'(a)',err=666) c(j)(1:59)
+            read (10,'(a)',err=666) c(j)(1:83)
           end do
 c
 c Create input format list
@@ -217,6 +218,9 @@ c Added its scaled moment of inertia -- SMK
             el(27,k) = s(1)
             el(28,k) = s(2)
             el(29,k) = s(3)
+            el(30,k) = mio_c2fl (c(j)(60:67))
+            el(31,k) = mio_c2fl (c(j)(68:75))
+            el(32,k) = mio_c2fl (c(j)(76:83))
 c
 c Calculate spin rate and longitude & inclination of spin vector
             temp = sqrt(s(1)*s(1) + s(2)*s(2) + s(3)*s(3))
@@ -1815,23 +1819,23 @@ c
       include 'mercury.inc'
 c
 c Input/Output
-      integer timestyle,nel,iel(29),lenhead
+      integer timestyle,nel,iel(32),lenhead
       character*250 string,header,fout
 c
 c Local
       integer i,j,pos,nsub,lim(2,20),formflag,lenfout,f1,f2,itmp
-      character*1 elcode(29)
-      character*4 elhead(29)
+      character*1 elcode(32)
+      character*4 elhead(32)
 c
 c------------------------------------------------------------------------------
 c
       data elcode/ 'a','e','i','g','n','l','p','q','b','x','y','z',
      %  'u','v','w','r','f','m','o','s','d','c','h','t','k','j','1','2',
-     %  '3'/
+     %  '3','4','5','6'/
       data elhead/ 'a   ','e   ','i   ','omga','Omga','M   ','pmga',
      %  'q   ','Q   ','x   ','y   ','z   ','vx  ','vy  ','vz  ','r   ',
      %  'f   ','mass','obl ','spnP','dens','CMR2','spni','spnn',
-     %  'eqR ','J2  ','sx  ','sy  ','sz  '/
+     %  'eqR ','J2  ','sx  ','sy  ','sz  ','tct1','tct2','tct3'/
 c
 c Initialize header to a blank string
       do i = 1, 250
@@ -1859,7 +1863,7 @@ c
 c Identify the required elements
       call mio_spl (250,string,nsub,lim)
       do i = 1, nsub
-        do j = 1, 29
+        do j = 1, 32
           if (string(lim(1,i):lim(1,i)).eq.elcode(j)) iel(i) = j
         end do
       end do
