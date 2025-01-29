@@ -9,6 +9,10 @@ The modifications include the addition of the general relativistic force and the
 
 See https://github.com/4xxi/mercury for more information on how to operate the parent code mercury.
 
+Example Compilation using GFortran:
+
+- gfortran -O3 -ffixed-line-length-none -std=legacy smercury-T.for -o smercury_T
+
 Modifications:
 
 - the param.in file now requires one of the following argument keywords to specify the spin-tracking algorithm: "spin", "Spin", "SPIN", "spn", or "SPN"
